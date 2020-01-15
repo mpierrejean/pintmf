@@ -1,0 +1,90 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+library(MSGLasso)
+library(CrIMMix)
+```
+```{r, simulations}
+set.seed(333)
+nclust <- 4
+nByclust= c(5, 10, 25, 10)
+c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.05, noise=1)
+c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary", params=list(c(p=0.6)), prop=0.1, noise=0.3)
+params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
+c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000,flavor="beta", params=params_beta, prop=0.1, noise=0.2)
+data <- list(c_1$data, c_2$data, c_3$data)
+data <- lapply(data, function (dd){
+colnames(dd) <- sprintf("gene%s",1:ncol(dd)) 
+dd
+})
+true.clust <- c_1$true.clusters
+print(sapply(data,dim))
+data_names <- c("gaussian", "binary", "beta-like")
+names(data) <- data_names
+
+```
+
+```{r}
+W <- CrIMMix::IntMultiOmics(data, method="SNF", K=4)$clust %>% nnet::class.ind()
+```
+
+```{r}
+library(sglfast)
+idx_folds <- sample(size=5, 1:nrow(data[[1]]))
+y.test <- data[[1]][idx_folds,] %>% as.numeric()
+y.train <- data[[1]][-idx_folds, ] %>% as.numeric()
+
+J <- ncol(data[[1]])
+
+W.tilde.test <- Matrix::Matrix(kronecker(Matrix::Diagonal(J), W[idx_folds,]), sparse = TRUE)
+W.tilde.train <- Matrix::Matrix(kronecker(Matrix::Diagonal(J), W[-idx_folds,]), sparse = TRUE)
+data.test <- list(x=W, y=y.test[1:50])
+data.train <- list(x=W, y=y.train[1:50])
+group_index <- rep(1:J, each=4)
+# We run the (unpooled) iterative SGL. For the 2-parameter version use isg_simple()
+library(future.apply)
+test <- future.apply::future_apply(data[[2]], 2,function(y) {
+  h <- cv.glmnet(x=W, y=y, intercept = FALSE)
+  coef(h)[-1,]
+})
+
+```
+

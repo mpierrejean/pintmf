@@ -1,0 +1,335 @@
+---
+title: "MultiOM vignette"
+author: "Morgane Pierre-Jean"
+date: "`r Sys.Date()`"
+output: github_document
+fig_align: "center"
+fig_width: 15
+fig_height: 10
+vignette: >
+%\VignetteIndexEntry{MultiOM vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  ---
+  
+  
+  ```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+```
+
+
+## Useful packages
+
+```{r, library}
+library(Matrix)
+library(tidyverse)
+library(PintMF)
+library(CrIMMix)
+library(future)
+```
+
+## Simulate data with CrIMMix package
+
+```{r, simulations}
+set.seed(333)
+nclust <- 4
+nByclust= c(5, 10, 25, 10)
+c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.05, noise=1)
+c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary", params=list(c(p=0.6)), prop=0.1, noise=0.3)
+params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
+c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000,flavor="beta", params=params_beta, prop=0.1, noise=0.2)
+data <- list(c_1$data, c_2$data, c_3$data)
+data <- lapply(data, function (dd){
+  colnames(dd) <- sprintf("gene%s",1:ncol(dd)) 
+  dd
+})
+true.clust <- c_1$true.clusters
+print(sapply(data,dim))
+data_names <- c("gaussian", "binary", "beta-like")
+names(data) <- data_names
+
+```
+## Figures Raw data
+```{r, heatmap_plot, fig.width=10, fig.height=5}
+cols.clust <- RColorBrewer::brewer.pal(4, "Set1")[true.clust %>% as.factor] 
+data[[1]] %>%  gplots::heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+data[[2]] %>%  gplots::heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+data[[3]] %>%  gplots::heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+```
+
+## Run MultiOM and Mocluster
+```{r run_my_meth}
+data_t <- data
+data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
+library(future.apply)
+R_p <- future_lapply(2:10, function(p) SolveInt(Y=data_t, p=p, max.it=2, verbose=TRUE, init_flavor="snf", flavor_mod="glmnet"))
+```
+
+
+```{r, pve}
+loss <- sapply(R_p, function (rr){
+  W <- rr$W
+  l <- sapply(1:length(rr$H), function (ii) {
+    h <- rr$H[[ii]]
+    y <- data_t[[ii]]
+    sum((y-W%*%h)^2)/(nrow(W))
+  })
+  mean(l)
+})
+pves <- sapply(R_p, function (rr){
+  rr$pve[2]
+})
+loss_W <- sapply(R_p, function (rr){
+  W <- rr$W
+  sum(W^2)/ncol(W)
+})
+
+iteration <- 2:10
+df_pve <- data.frame(pve=loss_W, iteration=iteration)
+pen <- 2*(sapply(data_t, sd) %>% mean)
+ggplot(df_pve, aes(x=iteration, y=pve+pen*iteration))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)
+```
+
+```{r}
+library(tidyr)
+RSS_data_mat <- sapply(R_p, computeLL, Y=data_t)
+RSS_data <-  RSS_data_mat %>% t %>% data.frame
+
+BIC <- sapply(seq(from=0.1, to =2, length=5), function (pen) apply(RSS_data_mat, 2, compute_BIC, pen = pen)[1,])
+RSS_data <-  RSS_data_mat %>% t %>% data.frame %>% cbind(BIC= BIC) %>% pivot_longer( cols = starts_with("BIC"),names_to = "BIC")
+ggplot(data = RSS_data, aes(x = p)) +theme_bw()+geom_line(aes(y = value))+facet_wrap(.~BIC, scale="free")
+
+```
+
+
+```{r, pve}
+p <- iteration[which.min(RSS_data %>% filter(BIC=="BIC.3") %>% select(value) %>% pull %>% round)]
+R <- SolveInt(Y=data_t, p=p, max.it=5, verbose=TRUE, init_flavor="snf", flavor_mod="glmnet")
+df_pve <- data.frame(pve=R$pve, iteration=1:length(R$pve))
+g_pve <- ggplot(df_pve, aes(x=iteration, y=pve))+geom_point()+theme_bw()+geom_line()+ylim(c(0, max(df_pve$pve)))
+df_loss <- data.frame(loss=R$loss[-1], iteration=1:length(R$loss[-1]))
+g_loss <- ggplot(df_loss, aes(x=iteration, y=loss))+geom_point()+theme_bw()+geom_line()
+library(gridExtra)
+grid.arrange(g_pve, g_loss, ncol=2)
+```
+```{r, run_methods}
+
+R_moclust <- CrIMMix::IntMultiOmics(data_t, method="Mocluster", K=4, k= c(0.4, 0.2, 0.6))
+R_intNMF <- CrIMMix::IntMultiOmics(data_t, method="intNMF", K=4)
+
+R_SNF <- CrIMMix::IntMultiOmics(data_t, method="SNF", K=4)
+```
+
+
+## Performance evaluation
+
+### Clustering
+```{r, clustering}
+clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
+clust_moclust <- R_moclust$clust
+clust_intNMF <- R_intNMF$clust
+
+clust_snf <- R_SNF$clust
+
+true.clusters <- c_1$true.clusters
+cat("my clustering:", mclust::adjustedRandIndex(clust, true.clusters), "\n")
+cat("mocluster clustering:", mclust::adjustedRandIndex(clust_moclust, true.clusters), "\n")
+cat("intNMF clustering:", mclust::adjustedRandIndex(clust_intNMF, true.clusters), "\n")
+cat("SNF clustering:", mclust::adjustedRandIndex(clust_snf, true.clusters), "\n")
+cols <- RColorBrewer::brewer.pal(4, "Set1")
+table(true.clusters, clust)
+library(RColorBrewer)
+pal <- rev(RColorBrewer::brewer.pal(10, "RdBu"))
+gplots::heatmap.2(R$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clusters)],
+                  col = pal)
+```
+
+
+
+
+### TPR and FPR
+
+```{r, ROC_eval}
+truth <- list( gsub("gene", "", c_1$positive %>% unlist %>% unique), 
+               gsub("gene", "", c_2$positive%>% unlist %>% unique), 
+               gsub("gene", "", c_3$positive%>% unlist %>% unique)) 
+
+est_multiom <- lapply(R$H, function (rr) {
+  rr%>% 
+    apply(1,FUN=function(x) which(abs(x)>quantile(abs(x), 0.95))) %>% 
+    unlist %>% 
+    unique()
+})
+
+ndat <- data %>% length
+J <- sapply(data, ncol)
+
+
+denom_tp <- sapply(truth, length)
+mapply(function(e, t, d) (e %>% intersect(t) %>% length)/d, est_multiom, truth, denom_tp)
+mapply(function(e, t, d, j) (e %>% setdiff(t) %>% length)/(j-d), est_multiom, truth, denom_tp, J)
+```
+
+
+
+```{r, roc_eval_moclust}
+a <- R_moclust$fit@loading
+test <- rowSums(abs(a))
+idx <- which(test!=0)
+est_muclust <- test[idx]
+est_muclust <- lapply(1:ndat, function (kk){
+  idx <- grep(sprintf("dat%s", kk), names(est_muclust))
+  regexp <- "[[:digit:]]+"
+  gsub(sprintf("_dat%s", kk), "", names(est_muclust)[idx]) %>% stringr::str_extract(pattern=regexp)
+})  
+
+mapply(function(e, t, d) (e %>% intersect(t) %>% length)/d, est_muclust, truth, denom_tp)
+mapply(function(e, t, d, j) (e %>% setdiff(t) %>% length)/(j-d), est_muclust, truth, denom_tp, J)
+```
+
+## ROC Figures
+
+```{r, roc_multiom, fig.width=7}
+H_transformed <- R$H
+H_transformed[[3]] <- apply(H_transformed[[3]], 2, function (hh) hh)
+#H_transformed[[1]] <-  apply(H_transformed[[1]], 2, function (hh) hh-mean(hh))
+#H_transformed[[2]] <-  apply(H_transformed[[2]], 2, function (hh) hh-mean(hh))
+
+H_coef <- lapply(H_transformed, function (hh) apply(abs(hh), 2, sum))
+
+H_sorted <- lapply(H_coef, order,decreasing = TRUE)
+ndat <- length(H_sorted)
+
+TPR_compute <- function(truth, selected_var,nvar=NULL){
+  ndat <- length(truth)
+  denom_tp <- sapply(truth, length)
+  tp <- lapply(1:ndat, function(ii){
+    if(is.null(nvar)){nvar= length(selected_var[[ii]])}
+    ho <- selected_var[[ii]][1:nvar]
+    sapply(1:length(ho), function (tt){
+      t <- 1:tt
+      tpr <- (ho[t] %>% intersect(truth[[ii]]) %>% length)/denom_tp[ii]
+    })
+  })
+  return(tp)
+}
+
+FPR_compute <- function(truth, selected_var, J,nvar=NULL){
+  ndat <- length(truth)
+  denom_tp <- sapply(truth, length)
+  fp <- lapply(1:ndat, function(ii){
+    if(is.null(nvar)){nvar= length(selected_var[[ii]])}
+    ho <- selected_var[[ii]][1:nvar]
+    sapply(1:length(ho), function (tt){
+      t <- 1:tt
+      fpr <- (ho[t]%>% setdiff(truth[[ii]]) %>% length)/(J[ii]-denom_tp[ii])
+    })
+  })
+  return(fp)
+}
+
+TPR_list <- TPR_compute(truth, H_sorted)
+FPR_list <- FPR_compute(truth, H_sorted, J)
+
+
+
+roc_eval <- list(FPR=FPR_list, TPR=TPR_list) 
+ROC_df <- do.call(rbind, lapply(1:ndat, function (ii){
+  fpr <- roc_eval$FPR[[ii]]
+  tpr <- roc_eval$TPR[[ii]]
+  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
+}))
+ggplot(ROC_df, aes(x=fpr, y=tpr, color=data, type=data))+geom_line()+scale_x_continuous(limits=c(0,1))+scale_y_continuous(limits=c(0,1))+theme_bw()+geom_abline(slope=1, intercept=0)
+
+```
+
+
+## Top 10
+
+```{r}
+TPR_compute(truth, H_sorted, 330) %>% sapply( max)
+FPR_compute(truth, H_sorted, J, 330) %>%sapply(max)
+```
+
+
+```{r, roc_intNMF, fig.width=7}
+H_transformed_nmf <- R_intNMF$fit$H
+H_transformed_nmf[[3]] <- apply(H_transformed_nmf[[3]], 2, function (hh) hh)
+#H_transformed_nmf[[1]] <-  apply(H_transformed_nmf[[1]], 2, function (hh) hh-mean(hh))
+#H_transformed_nmf[[2]] <-  apply(H_transformed_nmf[[2]], 2, function (hh) hh-mean(hh))
+
+H_coef_nmf<- lapply(H_transformed_nmf, function (hh) colSums(abs(hh)))
+
+H_sorted_nmf <- lapply(H_coef_nmf, order,decreasing = TRUE)
+ndat <- length(H_sorted_nmf)
+
+TPR_list <- TPR_compute(truth, H_sorted_nmf)
+FPR_list <- FPR_compute(truth, H_sorted_nmf, J)
+data_names <- c("gaussian", "binary", "beta-like")
+
+roc_eval <- list(FPR=FPR_list, TPR=TPR_list) 
+ROC_df_nmf <- do.call(rbind, lapply(1:ndat, function (ii){
+  fpr <- roc_eval$FPR[[ii]]
+  tpr <- roc_eval$TPR[[ii]]
+  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
+}))
+
+```
+
+
+```{r, roc_mocluster, fig.width=7}
+
+fit <- R_moclust$fit
+a <- fit@loading
+J <- sapply(fit@data, nrow)
+regexp <- "[[:digit:]]+"
+ndat <- length(R_moclust$fit@data )
+
+sumA <- rowSums(abs(a))
+sumA_order <- sort(sumA, decreasing = TRUE) %>% names
+sumA_order <- lapply(1:ndat, function (kk){
+  idx <- grep(sprintf("dat%s", kk), sumA_order)
+  gsub(sprintf("_dat%s", kk), "", sumA_order[idx]) %>% str_extract(pattern=regexp)
+})
+
+TPR_list <- TPR_compute(truth, sumA_order)
+FPR_list <- FPR_compute(truth, sumA_order, J)
+
+roc_eval_moclust <- list(FPR=FPR_list, TPR=TPR_list) 
+ROC_df_moclust <- do.call(rbind, lapply(1:ndat, function (ii){
+  fpr <- roc_eval_moclust$FPR[[ii]]
+  tpr <- roc_eval_moclust$TPR[[ii]]
+  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
+}))
+```
+
+```{r, fig.width=7}
+rocs <- rbind(cbind(ROC_df, method="my_method"), cbind(ROC_df_moclust, method="mocluster"), cbind(ROC_df_nmf, method="intNMF"))
+
+ggplot(rocs, aes(x=fpr, y=tpr, color=method))+geom_line()+scale_x_continuous(limits=c(0,1))+scale_y_continuous(limits=c(0,1))+theme_bw()+facet_wrap(.~data)
+```
+
+
+```{r,AUCS, fig.width=7}
+auc <- function (x, y){
+  round(sum(tis::lintegrate(c(x,1), c(y,1), xint=c(x,1))),2)
+}
+rocs %>% group_by(method, data) %>% summarize(auc=auc(fpr, tpr)) %>% ggplot(aes(x=method,y=data, fill=auc))+geom_tile()+ scale_fill_distiller(palette = "YlGnBu", direction=1, limits=c(0.5,1))
+
+
+```
+```{r}
+rocs %>% group_by(data, method) %>% summarize(auc=auc(fpr, tpr)) %>% knitr::kable()
+
+df_ARI <- data.frame(method=c("my_method", "mocluster", "NMF", "SNF"), ari=c(mclust::adjustedRandIndex(clust, true.clusters), mclust::adjustedRandIndex(clust_moclust, true.clusters), mclust::adjustedRandIndex(clust_intNMF, true.clusters), 
+                                                                             mclust::adjustedRandIndex(clust_snf, true.clusters)))
+
+df_ARI%>% knitr::kable()
+
+```
+
+
+

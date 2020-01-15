@@ -1,0 +1,68 @@
+---
+title: "Influence of the initialization"
+author: Morgane Pierre-Jean
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Useful packages
+
+```{r, library}
+library(Matrix)
+library(tidyverse)
+library(PintMF)
+library(CrIMMix)
+library(future)
+```
+
+## Simulate data with CrIMMix package
+
+```{r, simulations}
+nclust <- 4
+nByclust= c(5, 10, 25, 10)
+```
+
+```{r message=FALSE}
+clust_function <- function(R){
+  clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
+}
+test <- do.call(rbind, lapply(1:10, function (ii){
+  c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.05, noise=1)
+  c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary", params=list(c(p=0.6)), prop=0.1, noise=0.3)
+  params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
+  c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000,flavor="beta", params=params_beta, prop=0.1, noise=0.2)
+  data <- list(c_1$data, c_2$data, c_3$data)
+  data <- lapply(data, function (dd){
+    colnames(dd) <- sprintf("gene%s",1:ncol(dd)) 
+    dd
+  })
+  true.clust <- c_1$true.clusters
+  print(sapply(data,dim))
+  data_names <- c("gaussian", "binary", "beta-like")
+  names(data) <- data_names
+  data_t <- data
+  data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
+  R <- SolveInt(Y=data_t, p=4, max.it=3, verbose=TRUE, init_flavor="snf", flavor_mod="glmnet")
+  R_svd <- SolveInt(Y=data_t, p=4, max.it=3, verbose=TRUE, init_flavor="svd", flavor_mod="glmnet")
+  R_random <- SolveInt(Y=data_t, p=4, max.it=3, verbose=TRUE, init_flavor="random", flavor_mod="glmnet")
+   R_hclust <- SolveInt(Y=data_t, p=4, max.it=3, verbose=TRUE, init_flavor="hclust", flavor_mod="glmnet")
+  return(list(sim=ii,mclust::adjustedRandIndex(clust_function(R), true.clusters), 
+              mclust::adjustedRandIndex(clust_function(R_svd), true.clusters), mclust::adjustedRandIndex(clust_function(R_random), true.clusters), mclust::adjustedRandIndex(clust_function(R_hclust), true.clusters)))
+}))
+```
+
+
+
+## Performance evaluation
+
+```{r}
+test <- unlist(test) %>% matrix(byrow=FALSE, ncol=5)
+colnames(test) <- c("sim", "SNF", "SVD", "Random", "hclust")
+df <- test %>% as.matrix %>% data.frame %>% gather(key="method", value="ARI", SNF:hclust)
+g <- df %>% ggplot(aes(x=method, fill=method, y=ARI))+geom_boxplot()+theme_bw()+theme(legend.position = "none")+xlab("")
+ggsave(filename = '../../../papers/NAR-LaTeX-20170208/eval_init.eps', plot = g, width=7, height=5)
+```
+
