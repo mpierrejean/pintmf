@@ -4,8 +4,16 @@
 \alias{SolveInt}
 \title{SolveInt solve equation for H and W}
 \usage{
-SolveInt(Y, p, max.it = 20, flavor_mod = "glmnet", type = rep("none",
-  length(Y)), init_flavor = "hclust", verbose = FALSE, ...)
+SolveInt(
+  Y,
+  p,
+  max.it = 20,
+  flavor_mod = "glmnet",
+  type = rep("none", length(Y)),
+  init_flavor = "hclust",
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{Y}{observations, list of blocks of data}

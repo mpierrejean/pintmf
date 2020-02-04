@@ -8,7 +8,7 @@ Maintainer: Who to complain to <mpierre@cng.fr>
 Description: Package to perform Penalized Matrix Factorization for multi-omics data sets.
 License: GPL
 LazyData: TRUE
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.1
 Suggests:
     Matrix,
     MASS,

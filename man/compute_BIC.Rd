@@ -4,10 +4,12 @@
 \alias{compute_BIC}
 \title{compute_BIC Compute BIC the model}
 \usage{
-compute_BIC(LL)
+compute_BIC(LL, pen = 1)
 }
 \arguments{
 \item{LL}{result from computeLL function}
+
+\item{pen}{penalty value in formula}
 }
 \description{
 compute_BIC
