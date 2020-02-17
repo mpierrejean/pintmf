@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+@font-face {
+font-family: octicons-link;
+src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+body {
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+color: #333;
+font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+font-size: 16px;
+line-height: 1.6;
+word-wrap: break-word;
+}
+a {
+background-color: transparent;
+}
+a:active,
+a:hover {
+outline: 0;
+}
+strong {
+font-weight: bold;
+}
+h1 {
+font-size: 2em;
+margin: 0.67em 0;
+}
+img {
+border: 0;
+}
+hr {
+box-sizing: content-box;
+height: 0;
+}
+pre {
+overflow: auto;
+}
+code,
+kbd,
+pre {
+font-family: monospace, monospace;
+font-size: 1em;
+}
+input {
+color: inherit;
+font: inherit;
+margin: 0;
+}
+html input[disabled] {
+cursor: default;
+}
+input {
+line-height: normal;
+}
+input[type="checkbox"] {
+box-sizing: border-box;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+td,
+th {
+padding: 0;
+}
+* {
+box-sizing: border-box;
+}
+input {
+font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+a {
+color: #4078c0;
+text-decoration: none;
+}
+a:hover,
+a:active {
+text-decoration: underline;
+}
+hr {
+height: 0;
+margin: 15px 0;
+overflow: hidden;
+background: transparent;
+border: 0;
+border-bottom: 1px solid #ddd;
+}
+hr:before {
+display: table;
+content: "";
+}
+hr:after {
+display: table;
+clear: both;
+content: "";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 15px;
+margin-bottom: 15px;
+line-height: 1.1;
+}
+h1 {
+font-size: 30px;
+}
+h2 {
+font-size: 21px;
+}
+h3 {
+font-size: 16px;
+}
+h4 {
+font-size: 14px;
+}
+h5 {
+font-size: 12px;
+}
+h6 {
+font-size: 11px;
+}
+blockquote {
+margin: 0;
+}
+ul,
+ol {
+padding: 0;
+margin-top: 0;
+margin-bottom: 0;
+}
+ol ol,
+ul ol {
+list-style-type: lower-roman;
+}
+ul ul ol,
+ul ol ol,
+ol ul ol,
+ol ol ol {
+list-style-type: lower-alpha;
+}
+dd {
+margin-left: 0;
+}
+code {
+font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+font-size: 12px;
+}
+pre {
+margin-top: 0;
+margin-bottom: 0;
+font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.select::-ms-expand {
+opacity: 0;
+}
+.octicon {
+font: normal normal normal 16px/1 octicons-link;
+display: inline-block;
+text-decoration: none;
+text-rendering: auto;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.octicon-link:before {
+content: '\f05c';
+}
+.markdown-body:before {
+display: table;
+content: "";
+}
+.markdown-body:after {
+display: table;
+clear: both;
+content: "";
+}
+.markdown-body>*:first-child {
+margin-top: 0 !important;
+}
+.markdown-body>*:last-child {
+margin-bottom: 0 !important;
+}
+a:not([href]) {
+color: inherit;
+text-decoration: none;
+}
+.anchor {
+display: inline-block;
+padding-right: 2px;
+margin-left: -18px;
+}
+.anchor:focus {
+outline: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 1em;
+margin-bottom: 16px;
+font-weight: bold;
+line-height: 1.4;
+}
+h1 .octicon-link,
+h2 .octicon-link,
+h3 .octicon-link,
+h4 .octicon-link,
+h5 .octicon-link,
+h6 .octicon-link {
+color: #000;
+vertical-align: middle;
+visibility: hidden;
+}
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+text-decoration: none;
+}
+h1:hover .anchor .octicon-link,
+h2:hover .anchor .octicon-link,
+h3:hover .anchor .octicon-link,
+h4:hover .anchor .octicon-link,
+h5:hover .anchor .octicon-link,
+h6:hover .anchor .octicon-link {
+visibility: visible;
+}
+h1 {
+padding-bottom: 0.3em;
+font-size: 2.25em;
+line-height: 1.2;
+border-bottom: 1px solid #eee;
+}
+h1 .anchor {
+line-height: 1;
+}
+h2 {
+padding-bottom: 0.3em;
+font-size: 1.75em;
+line-height: 1.225;
+border-bottom: 1px solid #eee;
+}
+h2 .anchor {
+line-height: 1;
+}
+h3 {
+font-size: 1.5em;
+line-height: 1.43;
+}
+h3 .anchor {
+line-height: 1.2;
+}
+h4 {
+font-size: 1.25em;
+}
+h4 .anchor {
+line-height: 1.2;
+}
+h5 {
+font-size: 1em;
+}
+h5 .anchor {
+line-height: 1.1;
+}
+h6 {
+font-size: 1em;
+color: #777;
+}
+h6 .anchor {
+line-height: 1.1;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table,
+pre {
+margin-top: 0;
+margin-bottom: 16px;
+}
+hr {
+height: 4px;
+padding: 0;
+margin: 16px 0;
+background-color: #e7e7e7;
+border: 0 none;
+}
+ul,
+ol {
+padding-left: 2em;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+margin-top: 0;
+margin-bottom: 0;
+}
+li>p {
+margin-top: 16px;
+}
+dl {
+padding: 0;
+}
+dl dt {
+padding: 0;
+margin-top: 16px;
+font-size: 1em;
+font-style: italic;
+font-weight: bold;
+}
+dl dd {
+padding: 0 16px;
+margin-bottom: 16px;
+}
+blockquote {
+padding: 0 15px;
+color: #777;
+border-left: 4px solid #ddd;
+}
+blockquote>:first-child {
+margin-top: 0;
+}
+blockquote>:last-child {
+margin-bottom: 0;
+}
+table {
+display: block;
+width: 100%;
+overflow: auto;
+word-break: normal;
+word-break: keep-all;
+}
+table th {
+font-weight: bold;
+}
+table th,
+table td {
+padding: 6px 13px;
+border: 1px solid #ddd;
+}
+table tr {
+background-color: #fff;
+border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+background-color: #f8f8f8;
+}
+img {
+max-width: 100%;
+box-sizing: content-box;
+background-color: #fff;
+}
+code {
+padding: 0;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+margin: 0;
+font-size: 85%;
+background-color: rgba(0,0,0,0.04);
+border-radius: 3px;
+}
+code:before,
+code:after {
+letter-spacing: -0.2em;
+content: "\00a0";
+}
+pre>code {
+padding: 0;
+margin: 0;
+font-size: 100%;
+word-break: normal;
+white-space: pre;
+background: transparent;
+border: 0;
+}
+.highlight {
+margin-bottom: 16px;
+}
+.highlight pre,
+pre {
+padding: 16px;
+overflow: auto;
+font-size: 85%;
+line-height: 1.45;
+background-color: #f7f7f7;
+border-radius: 3px;
+}
+.highlight pre {
+margin-bottom: 0;
+word-break: normal;
+}
+pre {
+word-wrap: normal;
+}
+pre code {
+display: inline;
+max-width: initial;
+padding: 0;
+margin: 0;
+overflow: initial;
+line-height: inherit;
+word-wrap: normal;
+background-color: transparent;
+border: 0;
+}
+pre code:before,
+pre code:after {
+content: normal;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font-size: 11px;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.pl-c {
+color: #969896;
+}
+.pl-c1,
+.pl-s .pl-v {
+color: #0086b3;
+}
+.pl-e,
+.pl-en {
+color: #795da3;
+}
+.pl-s .pl-s1,
+.pl-smi {
+color: #333;
+}
+.pl-ent {
+color: #63a35c;
+}
+.pl-k {
+color: #a71d5d;
+}
+.pl-pds,
+.pl-s,
+.pl-s .pl-pse .pl-s1,
+.pl-sr,
+.pl-sr .pl-cce,
+.pl-sr .pl-sra,
+.pl-sr .pl-sre {
+color: #183691;
+}
+.pl-v {
+color: #ed6a43;
+}
+.pl-id {
+color: #b52a1d;
+}
+.pl-ii {
+background-color: #b52a1d;
+color: #f8f8f8;
+}
+.pl-sr .pl-cce {
+color: #63a35c;
+font-weight: bold;
+}
+.pl-ml {
+color: #693a17;
+}
+.pl-mh,
+.pl-mh .pl-en,
+.pl-ms {
+color: #1d3e81;
+font-weight: bold;
+}
+.pl-mq {
+color: #008080;
+}
+.pl-mi {
+color: #333;
+font-style: italic;
+}
+.pl-mb {
+color: #333;
+font-weight: bold;
+}
+.pl-md {
+background-color: #ffecec;
+color: #bd2c00;
+}
+.pl-mi1 {
+background-color: #eaffea;
+color: #55a532;
+}
+.pl-mdr {
+color: #795da3;
+font-weight: bold;
+}
+.pl-mo {
+color: #1d3e81;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.task-list-item {
+list-style-type: none;
+}
+.task-list-item+.task-list-item {
+margin-top: 3px;
+}
+.task-list-item input {
+margin: 0 0.35em 0.25em -1.6em;
+vertical-align: middle;
+}
+:checked+.radio-label {
+z-index: 1;
+position: relative;
+border-color: #4078c0;
+}
+.sourceLine {
+display: inline-block;
+}
+code .kw { color: #000000; }
+code .dt { color: #ed6a43; }
+code .dv { color: #009999; }
+code .bn { color: #009999; }
+code .fl { color: #009999; }
+code .ch { color: #009999; }
+code .st { color: #183691; }
+code .co { color: #969896; }
+code .ot { color: #0086b3; }
+code .al { color: #a61717; }
+code .fu { color: #63a35c; }
+code .er { color: #a61717; background-color: #e3d2d2; }
+code .wa { color: #000000; }
+code .cn { color: #008080; }
+code .sc { color: #008080; }
+code .vs { color: #183691; }
+code .ss { color: #183691; }
+code .im { color: #000000; }
+code .va {color: #008080; }
+code .cf { color: #000000; }
+code .op { color: #000000; }
+code .bu { color: #000000; }
+code .ex { color: #000000; }
+code .pp { color: #999999; }
+code .at { color: #008080; }
+code .do { color: #969896; }
+code .an { color: #008080; }
+code .cv { color: #008080; }
+code .in { color: #008080; }
+</style>
+<style>
+body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+  padding-top: 0px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1 id="influence-of-the-initialization">Influence of the initialization</h1>
+<p>Morgane Pierre-Jean</p>
+<h2 id="useful-packages">Useful packages</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(Matrix)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(PintMF)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw">library</span>(CrIMMix)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw">library</span>(mclust)</a></code></pre></div>
+<h2 id="simulate-data-with-crimmix-package">Simulate data with CrIMMix package</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">nclust &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">nByclust=<span class="st"> </span><span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">10</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">clust_function &lt;-<span class="st"> </span><span class="cf">function</span>(R){</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">  clust &lt;-<span class="st"> </span>R<span class="op">$</span>W <span class="op">%&gt;%</span><span class="st"> </span>dist <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">hclust</span>(<span class="dt">method=</span><span class="st">&quot;ward.D2&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">cutree</span>(<span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">}</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">test &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, <span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="cf">function</span> (ii){</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">  c_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">simulateY</span>(<span class="dt">nclust =</span> nclust,  <span class="dt">n_byClust =</span> nByclust, <span class="dt">J=</span><span class="dv">100</span>, <span class="dt">prop=</span><span class="fl">0.05</span>, <span class="dt">noise=</span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">  c_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">simulateY</span>(<span class="dt">nclust =</span> nclust,  <span class="dt">n_byClust =</span> nByclust, <span class="dt">J=</span><span class="dv">50</span>, <span class="dt">flavor=</span><span class="st">&quot;binary&quot;</span>, <span class="dt">params=</span><span class="kw">list</span>(<span class="kw">c</span>(<span class="dt">p=</span><span class="fl">0.6</span>)), <span class="dt">prop=</span><span class="fl">0.1</span>, <span class="dt">noise=</span><span class="fl">0.3</span>)</a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">  params_beta &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="kw">c</span>(<span class="dt">mean1=</span><span class="op">-</span><span class="dv">1</span>, <span class="dt">mean2=</span><span class="dv">1</span>, <span class="dt">sd1=</span><span class="fl">0.5</span>, <span class="dt">sd2=</span><span class="fl">0.5</span>))</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">  c_<span class="dv">3</span> &lt;-<span class="st"> </span><span class="kw">simulateY</span>(<span class="dt">nclust =</span> nclust,  <span class="dt">n_byClust =</span> nByclust, <span class="dt">J=</span><span class="dv">500</span>,<span class="dt">flavor=</span><span class="st">&quot;beta&quot;</span>, <span class="dt">params=</span>params_beta, <span class="dt">prop=</span><span class="fl">0.2</span>, <span class="dt">noise=</span><span class="fl">0.2</span>)</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">  data &lt;-<span class="st"> </span><span class="kw">list</span>(c_<span class="dv">1</span><span class="op">$</span>data, c_<span class="dv">2</span><span class="op">$</span>data, c_<span class="dv">3</span><span class="op">$</span>data)</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">  data &lt;-<span class="st"> </span><span class="kw">lapply</span>(data, <span class="cf">function</span> (dd){</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">    <span class="kw">colnames</span>(dd) &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;gene%s&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(dd)) </a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">    dd</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">  })</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14">  true.clust &lt;-<span class="st"> </span>c_<span class="dv">1</span><span class="op">$</span>true.clusters</a>
+<a class="sourceLine" id="cb3-15" data-line-number="15">  <span class="kw">print</span>(<span class="kw">sapply</span>(data,dim))</a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">  data_names &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;gaussian&quot;</span>, <span class="st">&quot;binary&quot;</span>, <span class="st">&quot;beta-like&quot;</span>)</a>
+<a class="sourceLine" id="cb3-17" data-line-number="17">  <span class="kw">names</span>(data) &lt;-<span class="st"> </span>data_names</a>
+<a class="sourceLine" id="cb3-18" data-line-number="18">  data_t &lt;-<span class="st"> </span>data</a>
+<a class="sourceLine" id="cb3-19" data-line-number="19">  data_t[[<span class="dv">3</span>]] &lt;-<span class="st"> </span><span class="kw">log2</span>(data[[<span class="dv">3</span>]]<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>data[[<span class="dv">3</span>]]))</a>
+<a class="sourceLine" id="cb3-20" data-line-number="20">  R &lt;-<span class="st"> </span><span class="kw">SolveInt</span>(<span class="dt">Y=</span>data_t, <span class="dt">p=</span><span class="dv">4</span>, <span class="dt">max.it=</span><span class="dv">3</span>, <span class="dt">verbose=</span><span class="ot">TRUE</span>, <span class="dt">init_flavor=</span><span class="st">&quot;snf&quot;</span>, <span class="dt">flavor_mod=</span><span class="st">&quot;glmnet&quot;</span>)</a>
+<a class="sourceLine" id="cb3-21" data-line-number="21">  R_svd &lt;-<span class="st"> </span><span class="kw">SolveInt</span>(<span class="dt">Y=</span>data_t, <span class="dt">p=</span><span class="dv">4</span>, <span class="dt">max.it=</span><span class="dv">3</span>, <span class="dt">verbose=</span><span class="ot">TRUE</span>, <span class="dt">init_flavor=</span><span class="st">&quot;svd&quot;</span>, <span class="dt">flavor_mod=</span><span class="st">&quot;glmnet&quot;</span>)</a>
+<a class="sourceLine" id="cb3-22" data-line-number="22">  R_random &lt;-<span class="st"> </span><span class="kw">SolveInt</span>(<span class="dt">Y=</span>data_t, <span class="dt">p=</span><span class="dv">4</span>, <span class="dt">max.it=</span><span class="dv">3</span>, <span class="dt">verbose=</span><span class="ot">TRUE</span>, <span class="dt">init_flavor=</span><span class="st">&quot;random&quot;</span>, <span class="dt">flavor_mod=</span><span class="st">&quot;glmnet&quot;</span>)</a>
+<a class="sourceLine" id="cb3-23" data-line-number="23">   R_hclust &lt;-<span class="st"> </span><span class="kw">SolveInt</span>(<span class="dt">Y=</span>data_t, <span class="dt">p=</span><span class="dv">4</span>, <span class="dt">max.it=</span><span class="dv">3</span>, <span class="dt">verbose=</span><span class="ot">TRUE</span>, <span class="dt">init_flavor=</span><span class="st">&quot;hclust&quot;</span>, <span class="dt">flavor_mod=</span><span class="st">&quot;glmnet&quot;</span>)</a>
+<a class="sourceLine" id="cb3-24" data-line-number="24">  <span class="kw">return</span>(<span class="kw">list</span>(<span class="dt">sim=</span>ii,<span class="kw">adjustedRandIndex</span>(<span class="kw">clust_function</span>(R), true.clust), </a>
+<a class="sourceLine" id="cb3-25" data-line-number="25">              <span class="kw">adjustedRandIndex</span>(<span class="kw">clust_function</span>(R_svd), true.clust), <span class="kw">adjustedRandIndex</span>(<span class="kw">clust_function</span>(R_random), true.clust), <span class="kw">adjustedRandIndex</span>(<span class="kw">clust_function</span>(R_hclust), true.clust)))</a>
+<a class="sourceLine" id="cb3-26" data-line-number="26">}))</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+##      [,1] [,2] [,3]
+## [1,]   50   50   50
+## [2,]  100   50  500
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4 
+## At least one column is zero, you should be run the algorithm with less latent variables
+## [1] 4
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 2 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 3 
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## [1] &quot;glmnet&quot;
+## 4
+</code></pre>
+<h2 id="performance-evaluation">Performance evaluation</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">test &lt;-<span class="st"> </span><span class="kw">unlist</span>(test) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">matrix</span>(<span class="dt">byrow=</span><span class="ot">FALSE</span>, <span class="dt">ncol=</span><span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">colnames</span>(test) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;sim&quot;</span>, <span class="st">&quot;SNF&quot;</span>, <span class="st">&quot;SVD&quot;</span>, <span class="st">&quot;Random&quot;</span>, <span class="st">&quot;hclust&quot;</span>)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">df &lt;-<span class="st"> </span>test <span class="op">%&gt;%</span><span class="st"> </span>as.matrix <span class="op">%&gt;%</span><span class="st"> </span>data.frame <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">gather</span>(<span class="dt">key=</span><span class="st">&quot;method&quot;</span>, <span class="dt">value=</span><span class="st">&quot;ARI&quot;</span>, SNF<span class="op">:</span>hclust)</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">g &lt;-<span class="st"> </span>df <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x=</span>method, <span class="dt">fill=</span>method, <span class="dt">y=</span>ARI))<span class="op">+</span><span class="kw">geom_boxplot</span>()<span class="op">+</span><span class="kw">theme_bw</span>()<span class="op">+</span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>)<span class="op">+</span><span class="kw">xlab</span>(<span class="st">&quot;&quot;</span>)</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">#ggsave(filename = '../../../papers/NAR-LaTeX-20170208/eval_init.eps', plot = g, width=7, height=5)</span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">g</a></code></pre></div>
+<p><img src="data:image/png;base64,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TYAAAQIE6i0wb9689MQTT6QFCxbUGyKn1gugOcErlgABAgRaF5g/f36aO3du6xuwZq0FrrrqqrT//vunE088Me2xxx7ptttuq7VHHo0XQPNQVyYBAgQIrJfA5z//+XTGGWes1zasXE+Be+65J33qU59KCxcuTPFGJqZjjjkmPfzww/UEyanVAmhO8IolQIAAAQIERl7giiuuWK3Q7u7u9P3vf3+1+WZ0TkAA7ZytLRMgQIAAAQIFE+jp6VmtRhFAh5q/2oJmtE1AAG0bpQ0RIECAAAECRRc4/PDDVwubfX196dBDDy161StVPwG0Ut2pMQQIECBAgEAzge233z5985vfzBYZN25c2nLLLdP111+fpk6d2mw1r7VZYPVx6DYXYHMECBAgQIAAgSIJvOUtb0lxM1J8FNOMGTNSBFHTyAoYAR1Zb6URIECAAAECBRAYM2ZMdiretZ/5dIYAmo+7UgkQIECAAAECtRUQQGvb9RpOgAABAgQIEMhHQADNx12pBAgQIECAAIHaCgigte16DSdAgAABAgQI5CMggObjrlQCBAgQIECAQG0FBNDadr2GEyBAgAABAgTyERBA83FXKgECBAgQIECgtgICaG27XsMJECBAgAABAvkICKD5uCuVAAECBAgQIFBbAQG0tl2v4QQIECBAgACBfAQE0HzclUqAAAECBAgQqK2AAFrbrtdwAgQIECBAgEA+AgJoPu5KJUCAAAECBAjUVkAArW3XazgBAgQIECBAIB8BATQfd6USIECAAAECBGorIIDWtus1nAABAgQIECCQj4AAmo+7UgkQIECAAAECtRUQQGvb9RpOgAABAgQIEMhHQADNx12pBAgQIECAAIHaCgigte16DSdAgAABAgQI5CMggObjrlQCBAgQIECAQG0FBNDadr2GEyBAgAABAgTyERBA83FXKgECBAgQIECgtgICaG27XsMJECBAgAABAvkICKD5uCuVAAECBAgQIFBbAQG0tl2v4QQIECBAgACBfAR68im286UuXbo0zZkzp/MF1ayEvr6+tHz5crY16/d2Nre/vz/b3CuvvJJ6e3vbuWnbqpFAHIdiX3Kcr1Gnt7mpsQ/FNG/evNTdbTyunbyRFZYtW9Z0k5UNoGPGjElTp05t2ngvrrvAggUL0qJFi9iuO501ficQB6XZs2enDTbYII0fP54LgZYEIjB0dXU5FrWkZ6UQWLJkSfYGZsqUKamnp7JxKJfOjgA6atSopmWL/E15vEiAAAECBAgQINBuAQG03aK2R4AAAQIECBAg0FRAAG3K40UCBAgQIECAAIF2Cwig7Ra1PQIECBAgQIAAgaYCAmhTHi8SIECAAAECBAi0W0AAbbeo7REgQIAAAQIECDQVEECb8niRAAECBAgQIECg3QICaLtFbY8AAQIECBAgQKCpgADalMeLBAgQIECAAAEC7RYQQNstansECBAgQIAAAQJNBQTQpjxeJECAAAECBAgQaLeAANpuUdsjQIAAAQIECBBoKiCANuXxIgECBAgQIECAQLsFBNB2i9oeAQIECBAgQIBAUwEBtCmPFwkQIECAAAECBNotIIC2W9T2CBAgQIAAAQIEmgoIoE15vEiAAAECBAgQINBuAQG03aK2R4AAAQIECBAg0FRAAG3K40UCBAgQIECAAIF2Cwig7Ra1PQIECBAgQIAAgaYCAmhTHi8SIECAAAECBAi0W0AAbbeo7REgQIAAAQIECDQVEECb8niRAAECBAgQIECg3QICaLtFbY8AAQIECBAgQKCpgADalMeLBAgQIECAAAEC7RYQQNstansECBAgQIAAAQJNBQTQpjxeJECAAAECBAgQaLeAANpuUdsjQIAAAQIECBBoKiCANuXxIgECBAgQIECAQLsFBNB2i9oeAQIECBAgQIBAUwEBtCmPFwkQIECAAAECBNotIIC2W9T2CBAgQIAAAQIEmgoIoE15vEiAAAECBAgQINBuAQG03aK2R4AAAQIECBAg0FRAAG3K40UCBAgQIECAAIF2Cwig7Ra1PQIECBAgQIAAgaYCAmhTHi8SIECAAAECBAi0W0AAbbdoxbf3k5/8JF100UUVb6XmESBAgAABAp0UEEA7qVvBbd9///3phhtuqGDLNIkAAQIECBAYKQEBdKSklUOAAAECBAgQIJAJ9HAgQIAAgWoKPPvss+nP3/Oe1NvbW7kGLuvrS/0rWrXjzjtXrm1jx4xJV1x+edpmm20q1zYNItAQEEAbEn4SIECgYgIvvvhimj93blrytren/ilTKta6ajana+HCtPQ/b03PP/+8AFrNLtaq3wkIoHYFAgQIVFzg1bfulpbN2rLiraxG87pnz05jVwRQE4GqC7gGtOo9rH0ECBAgQIAAgYIJCKAF6xDVIUCAAAECBAhUXUAArXoPax8BAgQIECBAoGACAmjBOkR1CBAgQIAAAQJVFxBAq97D2keAAAECBAgQKJiAAFqwDlEdAgQIECBAgEDVBUbsY5ji8+juvffetNVWW6XttttuNdfnnnsuPf744yvN7+rqSnvssUc277777ktLliwZeP31r399mjp16sBzDwgQIECAAAECBMohMCIBNMLjmWeemfbbb790wQUXpCOOOCIddNBBKwk9+uijK33HeHyDx/z589N1112X+lZ848Wpp56adt1114F1DjvsMAF0QMMDAgQIECBAgEB5BEYkgJ5//vnp7LPPTjuv+Mq0Qw45JB111FHpgAMOSGNWfN1YY9prr71S/IspRjo//OEPp9NPPz17HiOjm2++eTrvvPOy5/4jQIAAAQIECBAor0DHA2iMXj799NNpp512ypRmzpyZJkyYkJ555pm09dZbDyn3jW98I+24445pzz33zF5/5JFHsgB68803Z+F03333zbYxeOW77ror++qyxrxly5alRYsWNZ762SaB5cuXZ1ti2ybQGm6msQ8tXbo09ffHt3mbOiWwePHiTm3adjssEAMxjrOdRY58ElNvb28aNWpUZwur2dbDtnGsX1PTOx5AZ6/4WrGJEyemuJ6zMU2ePDnNmTNnyAAap92/973vpW9/+9uNxdPDDz+cHnrooWwE9bHHHkuXXHJJuvTSS9P06dMHlonnt976f19fNn78+LT77rtnp/AHFvCgLQKNX9joJxOB9RHwx3V99Ia37sIV3ytuKqdA9J3j7Mj03SuvvDIyBdWolEIE0HhXEaORg6eo2Lhx4wbPGngco5y77bZbipHSxnT00Uen+BcjpzHFO8NYLq4DbUxxmr8RjuJnXHM6eBuN5fxcP4HGZRNs18+xzmvH8SBuSow3oms6DtTZp51tjwEAUzkFpkyZ4m9Yh7sussS8efPStGnTUk9Px8fjOtyaYm0+ctjaTDsuHh0b7+Sio8eOHZsJxejnpptuOqTW97///XT88cev9Fqcro/RzkYAnTVrVoq75gdPg/+Qxam9GHHt7vYpU4ON2vmYbTs167Wtxml3v6Od7/fBZ546X5oS2ikQx1jH2XaKrr6thi/r1W3Wd07Dttl2Op7QIgHH6fC4mz2m22+/PW200UbZv3geNxg1rlOKkBrP3/jGN8ZLA1Osc+GFF2bP47TdLbfckvbZZ5+B1z0gQIAAAQIECBAoj0DHA2hQHHfccem73/1uOvTQQ9PFF1+cPvnJTw4IHXvssdn1nTHjySefTDNmzBgY6WwsdPDBB6e4RuPII4/M7qLfZZddUvwzESBAgAABAgQIlE+g46fgg2TLLbdMV155ZXatRVzXMni66aabBp5uu+22WVAdmPG7BxtuuGE655xzsjsC45rSxqn8VZfznAABAgQIECBAoPgCIxJAGwyrhs/G/OH+bFwDOtzlLUeAAAECBAgQIFA8gRE5BV+8ZqsRAQIECBAgQIBAXgICaF7yyiVAgAABAgQI1FRAAK1px2s2AQIECBAgQCAvAQE0L3nlEiBAgAABAgRqKiCA1rTjNZsAAQIECBAgkJeAAJqXvHIJECBAgAABAjUVEEBr2vGaTYAAAQIECBDIS0AAzUteuQQIECBAgACBmgoIoDXteM0mQIAAAQIECOQlIIDmJa9cAgQIECBAgEBNBQTQmna8ZhMgQIAAAQIE8hIQQPOSVy4BAgQIECBAoKYCAmhNO16zCRAgQIAAAQJ5CQigeckrlwABAgQIECBQUwEBtKYdr9kECBAgQIAAgbwEBNC85JVLgAABAgQIEKipgABa047XbAIECBAgQIBAXgICaF7yyiVAgAABAgQI1FRAAK1px2s2AQIECBAgQCAvAQE0L3nlEiBAgAABAgRqKiCA1rTjNZsAAQIECBAgkJeAAJqXvHIJECBAgAABAjUVEEBr2vGaTYAAAQIECBDIS0AAzUteuQQIECBAgACBmgoIoDXteM0mQIAAAQIECOQlIIDmJa9cAgQIECBAgEBNBQTQmna8ZhMgQIAAAQIE8hIQQPOSVy4BAgQIECBAoKYCAmhNO16zCRAgQIAAAQJ5CQigeckrlwABAgQIECBQUwEBtKYdr9kECBAgQIAAgbwEBNC85JVLgAABAgQIEKipgABa047XbAIECBAgQIBAXgICaF7yyiVAgAABAgQI1FRAAK1px2s2AQIECBAgQCAvAQE0L3nlEiBAgAABAgRqKiCA1rTjNZsAAQIECBAgkJeAAJqXvHIJECBAgAABAjUVEEBr2vGaTYAAAQIECBDIS0AAzUteuQQIECBAgACBmgoIoDXteM0mQIAAAQIECOQlIIDmJa9cAgQIECBAgEBNBQTQmna8ZhMgQIAAAQIE8hIQQPOSVy4BAgQIECBAoKYCAmhNO16zCRAgQIAAAQJ5CQigeckrlwABAgQIECBQUwEBtKYdr9kECBAgQIAAgbwEevIquNPl9vf3p76+vk4XU7vth2tMbGvX9W1r8PLly7NtxU/7UdtYh9zQsmXLhpxvZvEFou/8fnS2nxq/H5zb7xymjbywpq1XNoBG4xcuXLimdpvfokDjF5Zti4BWGzgoLV682B/YDu8PYWwqp0D0neNsZ/uu8fest7c3dXc7IdxO7VoH0NGjR6fJkye309O2Vgj09Pzfexa2dodWBeKgHwf8CRMmpPHjx7e6GesNQ2DixInDWMoiRRSIvnOc7WzPLFmyJMW/SZMmDfxt62yJ9dl6BNC1hXqRvz77g5YSIECAAAECBAohIIAWohtUggABAgQIECBQHwEBtD59raUECBAgQIAAgUIICKCF6AaVIECAAAECBAjUR0AArU9faykBAgQIECBAoBACAmghukElCBAgQIAAAQL1ERBA69PXWkqAAAECBAgQKISAAFqIblAJAgQIECBAgEB9BATQ+vS1lhIgQIAAAQIECiEggBaiG1SCAAECBAgQIFAfAQG0Pn2tpQQIECBAgACBQggIoIXoBpUgQIAAAQIECNRHQACtT19rKQECBAgQIECgEAICaCG6QSUIECBAgAABAvUREEDr09daSqAQAv39/WnRokWpr6+vEPVRCQIECBAYeQEBdOTNlUig1gIvvfRS+pM/+ZN066231tpB4wkQIFBnAQG0zr2v7QQIECBAgACBHAQE0BzQFUmAAAECBAgQqLOAAFrn3td2AgQIECBAgEAOAgJoDuiKJECAAAECBAjUWUAArXPvazsBAgQIECBAIAcBATQHdEUSIECAAAECBOosIIDWufe1nQABAgQIECCQg4AAmgO6IgkQIECAAAECdRYQQOvc+9pOgAABAgQIEMhBQADNAV2RBAgQIECAAIE6Cwigde59bSdAgAABAgQI5CAggOaArkgCBAgQIECAQJ0FBNA69762EyBAgAABAgRyEOjJoUxFEiBAgMAICox64onU1ds7giUqqlWBrnnzWl3VegRKJSCAlqq7VJYAAQLrLjD+369e95WsQYAAgQ4KOAXfQVybJkCAAAECBAgQWF3ACOjqJuYQIECgUgJLd35T6p80qVJtqmpjuhb1pjG/uKeqzdMuAgMCAugAhQcECBCopsDSd74rLZu1ZTUbV7FWdc+eLYBWrE81Z2gBp+CHdjGXAAECBAgQIECgQwICaIdgbZYAAQIECBAgQGBoAQF0aBdzCRAgQIAAAQIEOiQggHYI1mYJECBAgAABAgSGFhBAh3YxlwABAgQIECBAoEMCAmiHYG2WAAECBAgQIEBgaIGmH8N0+OGHp8cff3zoNQfNfec735nOOuusQXM8JECAAAECBAgQIDC0QNMAutlmmw291ipzN95441XmeEqAAAECBAgQIEBgaIGmAfRzn/vc0GuZS4AAAQIECBAgQKBFgbZcAzqc0/Qt1s9qBAgQIECAAAECFRNoOgIabX3mmWfSjTfemMaPH5/e+973pgkTJgwQ/Pa3v00nnXRSWr58efrOd74zMN8DAgQIECBAgAABAmsSaBpAH3nkkbTHHnukefPmpZ6ennTiiSemhx56KMU1n1dffXU6+uij09KlS9MFF1ywpu2bT4AAAQIECBAgQGAlgaYB9Atf+ELaZJNN0j333JNmzJiR3v3ud6cLL7wwTZw4MZ166qlp3333TRdddFHaaqutVtqoJyktXLgwLV68uHIUvb292Yj3Sy+9VLm2dXV1palTp1auXRpEgAABAgSKJtA0gP7mN79J73vf+9LWW2+d1fuEE05IH/nIR9KSJUvSV7/61XTssccWrT2FqE9fX196+9v3TIsW9RaiPp2oxNve9rZObDb3bZ577rnpoIMOyr0eKkCAAAECBKos0DSAxjWeO+6440D7t9hiizRnzpx02WWXpcMOO2xgvgcrC0QAjfD53o1npLdOnrTyi54VVuBvHn0szZ07t7D1UzECBAgQIFAVgaYBdNVGxnWgMR188MGrvrTW5y+++GK69957s9P122233ZDLP/nkk+nZZ58deG3atGlp2223zZ7HqGtcChCnSd/61rem0aNHDyxX1Ae/t8HEtO80p3SL2j+r1utTKwKoiQABAgQIEOi8wDoF0EZ1xowZ03g4rJ/33XdfOvPMM9N+++2X3bB0xBFHDHma8+tf/3qKUdcpU6Zk291pp52yABrXHX7oQx9Kv/d7v5cF1Kuuuip98YtfzMLosCpgIQIECBAgQIAAgcIIrDWAxun2u+++O6vw888/n/087bTTVgp/ERSbnZI///zz09lnn5123nnndMghh6SjjjoqHXDAAWnVIBt33Z933nlp1qxZKwFdeeWVaffdd08nn3xyNv+YY45JP/vZz7I79Fda0BMCBAgQIECAAIHCCzQNoHF3e3zsUvxrTHH6/Prrr288zX7GRzGtKYDG9ZBPP/10ipAa08yZM7PPEo3PF23c3BTzFy1alF1f+sILL6Tbb789xffLb7755vFSevTRR7PR0+zJiv922WWX9MADD6wUQP/5n/85/epXv8oWidPzUae8ruer4t3vDfsq/+xf0bgYbc9rv6my7eC2LViwIHsal9WwHizT/scN6/Zv2RY7LfDKK6/4/egw8rJly7IS5s+fn7q72/K9PB2ucXk2H9mv4bumWjcNoDfccMOa1svmRwHXXntteuKJJ9a43OzZs7OPbYprNxvT5MmTs7A5OID+7//+b3Z3/c9//vPsQ+9jtPPII4/MRkpj5HXDDTdsrJ49jlA7eIprTBvzYmQ1PipqbY0fvH47H8cH85vKKRB9l9d+U06xda91w5f1utut6xqOResqVpzl4/ek8btSnFpVqyaN34/42d8fQxCmdgkMZ99tGkDXVJEIehdffHGKazafe+657APp17TsqFGjVvsliuA6bty4lVbZfvvt0zXXXJM22mijbP4222yTYlQzTtWvuo1YP76ZafAUlwU0phj9jM8pnT59emPWiP40Ajqi3G0rLN4ixRuXvPabtjWk4BtqHJjid5h1Zzsr3uybyikQfef3o7N9F2dh4pN9Inc0brLubIn12XrktMhuzaZhB9B4d/CDH/wgfe1rX0sxMhp/PP7iL/4iuzmo2WdCxp3s8aHs0dFjx47N6hIdvummm65Ur/i2pZdffnkggMZ1oHFDUrwziV/CWKcxxeP4SCgTAQIECBAgQIBA+QTWetFDnNqOb0SKEcn9998/uyZlhx12SKeffno2AtosfAZHvKuIG4iuu+66TCeu74x3G42Rzscffzz7xqC4BuOUU07JrsGLsBshd++9986uy9hrr73STTfdlC0X9fmv//qv9OY3v7l82mpMgAABAgQIECCQmo6AxnWY8dWbMRoZNxkdfvjh6bWvfe0abzhak+dxxx2X4hR5nGKPC33jI5kaU3ybUnz7TNwh/573vCf7pqUYuo1rPj/72c9mi/3hH/5huvPOO9MHPvCBbP33v//9K93A1NiWnwQIECBAgAABAsUXaBpAf/SjH6XXve516ROf+ER2LebGG2/cUou23HLLFB+lFKfZG5/x2dhQjGw2pgi4H/zgB1Pc/Tf4pqMYRY0wGnd0xql/12o0xPwkQIAAAQIECJRPoOkp+BtvvDH71qOzzjorbbbZZunAAw9M3/3ud7PrOVtp6qrhc6htxAjp4PA5eJlJkyYJn4NBPCZAgAABAgQIlFCgaQCNkcvPfOYz6bHHHsuuwdxggw2yEcoIoTE6escdd/joghJ2uioTIECAAAECBPIUaBpAGxWLz/CM6zAvv/zy7Kswv/KVr2R3rL/jHe/IrgmNj0syESBAgAABAgQIEBiOwLAC6OANxd3rxx9/fPrFL36R4jve47R846s6By/nMQECBAgQIECAAIGhBJrehDTUCoPnvelNb0r/9E//NHiWxwQIECBAgAABAgSaCqzzCGjTrXmRAAECBAgQIECAwFoEBNC1AHmZAAECBAgQIECgvQICaHs9bY0AAQIECBAgQGAtAut1Dehatu1lAgQIECiAwOif3ZV6Hvp1AWqiCmsT6Fq4cG2LeJ1AJQQE0Ep0o0YQIEBgdYEZM2akqdOnp8X3/3L1F0s+Z+nSpSs+hzqlsWPHlLwlq1d/zIpPm3nNa16z+gvmEKiQgABaoc7UFAIECAwWiBDz0zvvHDyrMo+POeaY7POo4/OpTQQIlE/ANaDl6zM1JkCAAAECBAiUWkAALXX3qTwBAgQIECBAoHwCAmj5+kyNCRAgQIAAAQKlFhBAS919Kk+AAAECBAgQKJ+AAFq+PlNjAgQIECBAgECpBQTQUnefyhMgQIAAAQIEyicggJavz9SYAAECBAgQIFBqAQG01N2n8gQIECBAgACB8gkIoOXrMzUmQIAAAQIE1lPgqaeeSpdcckmaM2fOem7J6q0ICKCtqFmHAAECBAgQKLXAM888k7797W+nefPmlbodZa28AFrWnlNvAgQIECBAgEBJBQTQknacahMgQIAAAQIEyioggJa159SbAAECBAgQIFBSAQG0pB2n2gQIECBAgACBsgoIoGXtOfUmQIAAAQIECJRUQAAtacepNgECBAgQIECgrAICaFl7Tr0JECBAgAABAiUVEEBL2nGqTYAAAQIECBAoq4AAWtaeU28CBAgQIECAQEkFBNCSdpxqEyBAgAABAgTKKiCAlrXn1JsAAQIECBAgUFIBAbSkHafaBAgQIECAAIGyCgigZe059SZAgAABAgQIlFRAAC1px6k2AQIECBAgQKCsAgJoWXtOvQkQIECAAAECJRUQQEvacapNgAABAgQIECirgABa1p5TbwIECBAgQIBASQUE0JJ2nGoTIECAAAECBMoq0FPWipeh3g+8sjBtMGpUGaqqjisE+vv7ORAgQIAAAQIjICCAdhD5u7NfSPHPVA6BrnJUUy0JECBAgEDpBZyCL30XagABAgQIECBAoFwCRkA72F9vnzI5vX7ihA6WYNPtFLj0mefauTnbIkCAAAECBNYgIICuAaYds981daP0ZxtPb8embGMEBL717PMjUIoiCBAgQIAAAafg7QMECBAgQIAAAQIjKiCAjii3wggQIECAAAECBARQ+wABAgQIECBAgMCICgigI8qtMAIECBAgQIAAgcrehNTX15cWLlyYSw8vXrw4l3IVuv4CS5cuzW2/Wf/al2MLvb29WUVfffVV1uXoskLWMr44Iv7ldZwvJIpKrZNAHO9jir/Z9qN1olvrwpHBli9f3nS5ygbQ7u7u1NOTT/PyKrdpT3txWAKjVnxzlf4bFlXLCzV88/wdbbnyViycQGN/KlzFVKjwAnG8j8lxvzNd1dXV/Otd8klonWnrSluNP25jx45dad5IPfGVjiMl3f5y4kCU137T/tYUc4ujR4/OKsa6mP1TllrFH7f45/e1LD1WvHo2Amgck+xH7e2fsF1bAHUNaHvNbY0AAQIECBAgQGAtAgLoWoC8TIAAAQIECBAg0F6Byp6Cby+TrREgQIBAkQQOPPDA7OaRItVJXQgQGL6AADp8K0sSIECAQEEE9txzz7XeZVuQqqoGAQJDCDgFPwSKWQQIECBAgAABAp0TEEA7Z2vLBAgQIECAAAECQwgIoEOgmEWAAAECBAgQINA5AQG0c7a2TIAAAQIECBAgMISAADoEilkECBAgQIAAAQKdExBAO2drywQIECBAgAABAkMICKBDoJhFgAABAgQIECDQOQEBtHO2tkyAAAECBAgQIDCEgAA6BIpZBAgQIECAAAECnRMQQDtna8sECBAgQIAAAQJDCAigQ6CYRYAAAQIECBAg0DkB3wXfOVtbJrBeAk8++WS666671msbRVz55ZdfzqoVbVu8eHERq7hedXrd616Xdt111/XahpUJECBQdQEBtOo9rH2lFbjwwgvT1VdfXdr6r63i0bYqtm/WrM3TD3/447U13+sECBCotYAAWuvu1/giCyxfvjxNfs2y9JYjnihyNdVtkMDDP5yW+p7bZNAcDwkQIEBgKAEBdCgV8wgURKCrK6XuUQWpjGqsVSD6y0SAAAECaxdwE9LajSxBgAABAgQIECDQRgEjoG3EtCkCBAgQIFA1gTPOOCP9+Ee3Vq1Zqa+vL40eNSb91WGHrzjTVK1TTXEy5v2H/kU64YQTCttvAmhhu0bFCBAgQIBA/gK/+p8H0pjejdKOG+2Tf2XaXYMN2r3BYmzvnpduSL/+9a+LUZk11EIAXQOM2QQIECBAgMD/CWwxcYd04KyP4SiJwOMLf1n4mroGtPBdpIIECBAgQIAAgWoJCKDV6k+tIUCAAAECBAgUXkAALXwXqSABAgQIECBAoFoCAmi1+lNrCBAgQIAAAQKFFxBAC99FKkiAAAECBAgQqJaAAFqt/tQaAgQIECBAgEDhBQTQwneRChIgQIAAAQIEqiUggFarP7WGAAECBAgQIFB4AQG08F2kggQIECBAgACBagkIoNXqT60hQIAAAQIECBReQAAtfBepIAECBAgQIECgWgICaLX6U2sIECBAgAABAoUXEEAL30UqSIAAAQIECBColoAAWq3+1BoCBAgQIECAQOEFBNDCd5EKEiBAgAABAgSqJSCAVqs/tYYAAQIECBAgUHgBAbTwXaSCBAgQIECAAIFqCQig1epPrSFAgAABAgQIFF5AAC18F6kgAQIECBAgQKBaAgJotfpTawgQIECAAAEChRcQQAvfRSpIgAABAgQIEKiWgABarf7UGgIECBAgQIBA4QUE0MJ3kQoSIECAAAECBKolIIBWqz+1hgABAgQIECBQeAEBtPBdpIIECBAgQIAAgWoJ9IxUc1588cV07733pq222iptt912ayz20UcfTU899VTaY4890vjx4weWu++++9KSJUsGnr/+9a9PU6dOHXjuAQECBAgQIECAQDkERmQENMLjkUcemR5++OF02mmnpWuuuWZInY997GPpoosuSg899FA64ogj0t13350t19fXl0499dRsvVg3/j3zzDNDbsNMAgQIECBAgACBYguMyAjo+eefn84+++y08847p0MOOSQdddRR6YADDkhjxowZ0Ln//vvTCy+8kC677LJsXoySXnHFFWm33XZLjz/+eNp8883TeeedN7C8BwQIECBAgAABAuUU6PgIaIxePv3002mn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SGUF4mxMkc4OtQt6yZIl2ZvhGTNmpJ4ecahdrsPdjpuQhitlOQIECBAgQIAAgbYICKBtYbQRAgQIECBAgACB4QoIoMOVshwBAgQIECBAgEBbBATQtjDaCAECBAgQIECAwHAFBNDhSlmOAAECBAgQIECgLQICaFsYbYQAAQIECBAgQGC4AgLocKUsR4AAAQIECBAg0BYBAbQtjDZCgAABAgQIECAwXAEBdLhSliNAgAABAgQIEGiLgADaFkYbIUCAAAECBAgQGK6AADpcKcsRIECAAAECBAi0RUAAbQujjRAgQIAAAQIECAxXQAAdrpTlCBAgQIAAAQIE2iIggLaF0UYIECBAgAABAgSGKyCADlfKcgQIECBAgAABAm0REEDbwmgjBAgQIECAAAECwxXoGe6CZVvu3nvvTR/96EfLVu3C17evry8tW7YsjR07tvB1VcFiCvT396clS5ak0aNHp1GjRhWzkmpVeIFXX301xb40ZsyYwtdVBYspsHz58rR06dLs71lXV1cxK1nSWoXt2o7vXSt+gftL2r6m1a5os5q2eSRe/MpXvpKuuOKK9JOf/GQkilNGBQVeeumltNdee6UvfelL6Y/+6I8q2EJNGgmBk08+Oc2fPz/9y7/8y0gUp4wKCtx1113pQx/6ULrhhhvSa1/72gq2MN8mrS3UV3YEdG0Nz7dbylt6BPsYAeVb3j4sQs3j3XFM9qMi9EY56xDHodiP7EPl7L8i1Dr+njkW5dcTrgHNz17JBAgQIECAAIFaClR2BLSWvTkCjd5mm23SH/zBH4xASYqoqkBcP/zHf/zHaZNNNqlqE7VrBAR22WWXtGjRohEoSRFVFZg+fXp2LNpggw2q2sRCt6uy14AWWl3lCBAgQIAAAQI1FnAKvsadr+kECBAgQIAAgTwEnILPQ70AZd5///3ZR09su+22w6rNiy++mB588MHs7uVhrbDKQvGxOz66aRWUkjy98847U9y53pgmTZqUttpqq7T11ls3Zq33z5///Odp0003TZttttl6b8sGyi/ws5/9LD300EMpTo3GqfbY32JavHhx+sEPfpD22WefFPthY/rVr36VfeTLG97whhTr/va3v228lP2Mj4M54IADVprnSbUFnnjiiXTPPfek3t7eFH/ndt9996zBP/rRj9IOO+yQHW8GCzzyyCPp5ZdfTm984xvTf/zH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" /><!-- --></p>
+
+</body>
+</html>

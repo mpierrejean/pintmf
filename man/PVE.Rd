@@ -7,11 +7,11 @@
 PVE(data, H, W)
 }
 \arguments{
-\item{data}{alist of original data of size $n\times J_k$}
+\item{data}{alist of original data of size $n x J_k$}
 
-\item{H}{a list of feature matrix $p\times J_k$}
+\item{H}{a list of feature matrix $p x J_k$}
 
-\item{W}{a matrix of weights size $n\times{x}p$}
+\item{W}{a matrix of weights size $n x p$}
 }
 \value{
 pve percentage of variance explained

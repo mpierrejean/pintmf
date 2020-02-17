@@ -7,6 +7,7 @@
 #' @examples
 #' library(Matrix)
 #' H <- rSpMatrix(2, 500, nnz = 500, rand.x= function(nnz) round(rnorm(nnz, 2, 0.2), 2) )
+#' @importFrom Matrix spMatrix
 #' @export
 rSpMatrix <- function(nrow, ncol, nnz,
                       rand.x = function(nnz) round(rnorm(nnz), 2))
@@ -20,7 +21,7 @@ rSpMatrix <- function(nrow, ncol, nnz,
   ## Author: Martin Maechler, Date: 14.-16. May 2007
   stopifnot((nnz <- as.integer(nnz)) >= 0,
             nrow >= 0, ncol >= 0, nnz <= nrow * ncol)
-  Matrix::spMatrix(nrow, ncol,
+  spMatrix(nrow, ncol,
                    i = sample(nrow, nnz, replace = TRUE),
                    j = sample(ncol, nnz, replace = TRUE),
                    x = rand.x(nnz))

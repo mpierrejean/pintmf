@@ -23,14 +23,20 @@ SolveInt(
 \item{max.it}{by default 20. Maximum iteration of the algorithm, else until convergence
 of matrix W}
 
+\item{flavor_mod}{glmnet or (oem not implemented yet)}
+
 \item{type}{type of data (by default all are "none"),
 can take values into \code{ c("none", "methylation", "mutation")},
 this argument allows to adapt modelisation by adding constraints.
 For exemple methylation data takes values between 0 and 1, then H block corresponding to
 methylation data takes values between 0 and 1.}
 
+\item{init_flavor}{flavor to initialize W matrix (hclust, SNF, random, pca or svd)}
+
 \item{verbose}{A logical value indicating whether to print extra information.
 Defaults to FALSE}
+
+\item{...}{other arguments}
 }
 \value{
 A list that contains :
@@ -41,32 +47,4 @@ A list that contains :
 }
 \description{
 SolveInt
-}
-\examples{
-library(Matrix)
-library(tidyverse)
-library(multiOM)
-library(CrIMMix)
-c_1 <- simulateY(J=1000, prop=0.1, noise=1)
-c_2 <- simulateY(J=2000, prop=0.05, noise=1)
-c_3 <- simulateY(J=5000, prop=0.2,  noise=1)
-data <- list(c_1$data , c_2$data , c_3$data)
-print(sapply(data,dim))
-R <- list()
-grid_p <- 2:7
-R <- SolveInt(Y=data[c(1,2,3)], p=4, max.it=5, type=c("none", "none", "none"), verbose=TRUE, init_flavor="hclust")
-R_moclust <- CrIMMix::IntMultiOmics(data, method="Mocluster", K=4)
-library(ggplot2)
-gplots::venn(list(true=stringr::str_extract(c_1$positive \%>\% unlist, "[0-9]+"),
-                  estimates=R$H[[1]] \%>\% apply(1,FUN=function(x) which(x!=0)) \%>\% unlist \%>\% unique()))
-gplots::venn(list(true=stringr::str_extract(c_2$positive \%>\% unlist, "[0-9]+"),
-                  estimates=R$H[[2]] \%>\% apply(1,FUN=function(x) which(x!=0)) \%>\% unlist \%>\% unique()))
-gplots::venn(list(true=stringr::str_extract(c_3$positive \%>\% unlist, "[0-9]+"),
-estimates=R$H[[3]] \%>\% apply(1,FUN=function(x) which(x!=0)) \%>\% unlist \%>\% unique()))
-clust <- R$W \%>\% dist \%>\% hclust(method="ward.D2") \%>\% cutree(4)
-clust_moclust <- R_moclust$clust
-true.clusters <- c_1$true.clusters
-mclust::adjustedRandIndex(clust, true.clusters)
-mclust::adjustedRandIndex(clust_moclust, true.clusters)
-heatmap(R$W, scale="none")
 }

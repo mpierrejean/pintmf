@@ -2,6 +2,10 @@
 title: "Influence of the initialization"
 author: Morgane Pierre-Jean
 output: github_document
+vignette: >
+  %\VignetteIndexEntry{Influence of the initialization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[UTF-8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +20,7 @@ library(tidyverse)
 library(PintMF)
 library(CrIMMix)
 library(future)
+library(mclust)
 ```
 
 ## Simulate data with CrIMMix package
@@ -30,10 +35,10 @@ clust_function <- function(R){
   clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
 }
 test <- do.call(rbind, lapply(1:10, function (ii){
-  c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.05, noise=1)
-  c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary", params=list(c(p=0.6)), prop=0.1, noise=0.3)
+  c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=100, prop=0.05, noise=1)
+  c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=50, flavor="binary", params=list(c(p=0.6)), prop=0.1, noise=0.3)
   params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
-  c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000,flavor="beta", params=params_beta, prop=0.1, noise=0.2)
+  c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500,flavor="beta", params=params_beta, prop=0.2, noise=0.2)
   data <- list(c_1$data, c_2$data, c_3$data)
   data <- lapply(data, function (dd){
     colnames(dd) <- sprintf("gene%s",1:ncol(dd)) 
@@ -49,8 +54,8 @@ test <- do.call(rbind, lapply(1:10, function (ii){
   R_svd <- SolveInt(Y=data_t, p=4, max.it=3, verbose=TRUE, init_flavor="svd", flavor_mod="glmnet")
   R_random <- SolveInt(Y=data_t, p=4, max.it=3, verbose=TRUE, init_flavor="random", flavor_mod="glmnet")
    R_hclust <- SolveInt(Y=data_t, p=4, max.it=3, verbose=TRUE, init_flavor="hclust", flavor_mod="glmnet")
-  return(list(sim=ii,mclust::adjustedRandIndex(clust_function(R), true.clusters), 
-              mclust::adjustedRandIndex(clust_function(R_svd), true.clusters), mclust::adjustedRandIndex(clust_function(R_random), true.clusters), mclust::adjustedRandIndex(clust_function(R_hclust), true.clusters)))
+  return(list(sim=ii,adjustedRandIndex(clust_function(R), true.clust), 
+              adjustedRandIndex(clust_function(R_svd), true.clust), adjustedRandIndex(clust_function(R_random), true.clust), adjustedRandIndex(clust_function(R_hclust), true.clust)))
 }))
 ```
 
@@ -63,6 +68,7 @@ test <- unlist(test) %>% matrix(byrow=FALSE, ncol=5)
 colnames(test) <- c("sim", "SNF", "SVD", "Random", "hclust")
 df <- test %>% as.matrix %>% data.frame %>% gather(key="method", value="ARI", SNF:hclust)
 g <- df %>% ggplot(aes(x=method, fill=method, y=ARI))+geom_boxplot()+theme_bw()+theme(legend.position = "none")+xlab("")
-ggsave(filename = '../../../papers/NAR-LaTeX-20170208/eval_init.eps', plot = g, width=7, height=5)
+#ggsave(filename = '../../../papers/NAR-LaTeX-20170208/eval_init.eps', plot = g, width=7, height=5)
+g
 ```
 

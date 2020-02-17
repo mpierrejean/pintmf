@@ -2,6 +2,10 @@
 title: "BXD data"
 author: Morgane Pierre-Jean
 output: github_document
+vignette: >
+  %\VignetteIndexEntry{BXD data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[UTF-8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
@@ -15,6 +19,8 @@ library(Matrix)
 library(tidyverse)
 library(PintMF)
 library(CrIMMix)
+library(ggplot2)
+library(gridExtra)
 library(future)
 ```
 
@@ -23,6 +29,7 @@ Run Bxd
 
 ```{r}
 library(CrIMMixdata)
+library(PintMF)
 data(bxd)
 ```
 
@@ -41,7 +48,7 @@ MoClusterresults <- IntMultiOmics(bxd_filtered, method = "Mocluster", K=2, k=c(0
 
 
 ```{r}
-R_bxd <- lapply(2:8, function(p) PintMF::SolveInt(Y=bxd_filtered, p=p,
+R_bxd <- lapply(2:5, function(p) SolveInt(Y=bxd_filtered, p=p,
                                                   max.it=1,
                                                   verbose=TRUE,
                                                   init_flavor="snf",
@@ -83,7 +90,7 @@ loss_W <- sapply(R_bxd, function (rr){
   sum(W^2)/ncol(W)
 })
 
-iteration <- 2:8
+iteration <- 2:5
 df_pve <- data.frame(lossW=loss_W, iteration=iteration, loss= loss, pve= sapply(R_bxd, function (r) r$pve))
 pen <- 2*(sapply(bxd_filtered, sd) %>% mean)
 g1 <- ggplot(df_pve, aes(x=iteration, y=loss))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)
@@ -106,12 +113,14 @@ ggplot(df_loss, aes(x=iteration, y=loss))+geom_point()+theme_bw()+geom_line()
 ```
 
 ```{r}
-cols <- RColorBrewer::brewer.pal(4, "Set1")
+library(RColorBrewer)
+library(gplots)
+cols <- brewer.pal(4, "Set1")
 clust <- my_meth$W %>% dist %>% hclust(method="ward.D2") %>% cutree(2)
 table(true.clust.bxd, clust)
-library(RColorBrewer)
-pal <- rev(RColorBrewer::brewer.pal(5, "RdBu"))
-gplots::heatmap.2(my_meth$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clust.bxd)],
+
+pal <- rev(brewer.pal(5, "RdBu"))
+heatmap.2(my_meth$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clust.bxd)],
                   col = pal)
 ```
 
@@ -132,9 +141,10 @@ J <- sapply(data, ncol)
 ## ROC Figures
 
 ```{r, roc_multiom, fig.width=7}
+library(matrixStats)
 H_transformed <- my_meth$H
 H_coef <- lapply(H_transformed, function (hh) {
-  s <- matrixStats::colSds((hh))
+  s <- colSds((hh))
   names(s) <- colnames(hh)
   s
 })
@@ -143,16 +153,17 @@ H_sorted <- lapply(H_coef, sort,decreasing = TRUE) %>% lapply(names) %>% lapply(
 
 ```
 
-```{r}
+```{r, eval=FALSE}
 library(ComplexHeatmap)
-
-col.clust <- RColorBrewer::brewer.pal(7, "Set2")[c(4,5, 6, 7)]
+library(RColorBrewer)
+library(circlize)
+col.clust <- brewer.pal(7, "Set2")[c(4,5, 6, 7)]
 clust_col = structure(names = c("1", "2", "3", "4"),col.clust)
-col.true <- RColorBrewer::brewer.pal(6, "Set3")[c(5,6)]
+col.true <- brewer.pal(6, "Set3")[c(5,6)]
 true_col = structure(names = c("CD", "HFD"),col.true)
 for( i in 1:length(bxd_filtered)){
   mat <- bxd_filtered[[i]][, H_sorted[[i]][1:10]] %>% t
-  f2 = circlize::colorRamp2(seq(min(mat), max(mat), length = 3), c("blue", "#EEEEEE", "red"),
+  f2 = colorRamp2(seq(min(mat), max(mat), length = 3), c("blue", "#EEEEEE", "red"),
                             space = "RGB")
   ha = HeatmapAnnotation(PintMF = clust,
                          Truth = true.clust.bxd,
@@ -169,10 +180,10 @@ for( i in 1:length(bxd_filtered)){
                 show_column_names = FALSE,
                 top_annotation = ha,
                 name = names(bxd_filtered)[i])
-  pdf(sprintf("PintMF_heatmap_%s.pdf", names(bxd_filtered)[i]), width = 8, height = 8)
+  #pdf(sprintf("PintMF_heatmap_%s.pdf", names(bxd_filtered)[i]), width = 8, height = 8)
   draw(ht,
        annotation_legend_side = "left", heatmap_legend_side = "left")
-  dev.off()
+  #dev.off()
 
 }
 ```

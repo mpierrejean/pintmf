@@ -21,7 +21,7 @@ buildWeightMatrix <- function(nrow, ncol, prop=0.5) {
 ){
     cat("starting simulation\n")
     W <- do.call(rbind, replicate(nrow,
-                                  Matrix::spMatrix(1, ncol,
+                                  spMatrix(1, ncol,
                                                          i = sample(1, nnz, replace = TRUE),
                                                          j = sample(ncol, nnz, replace = TRUE),
                                                          x = rand.x(nnz))))

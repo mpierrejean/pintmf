@@ -1,8 +1,8 @@
 #' PVE computing
 #'
-#' @param data alist of original data of size $n\times J_k$
-#' @param H a list of feature matrix $p\times J_k$
-#' @param W a matrix of weights size $n\times{x}p$
+#' @param data alist of original data of size $n x J_k$
+#' @param H a list of feature matrix $p x J_k$
+#' @param W a matrix of weights size $n x p$
 #'
 #' @return pve percentage of variance explained
 #' @export

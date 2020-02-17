@@ -1,16 +1,16 @@
 ---
-title: "MultiOM vignette"
+title: PintMF vignette
 author: "Morgane Pierre-Jean"
 date: "`r Sys.Date()`"
-output: github_document
+output: rmarkdown::html_vignette
 fig_align: "center"
 fig_width: 15
 fig_height: 10
 vignette: >
-%\VignetteIndexEntry{MultiOM vignette}
+  %\VignetteIndexEntry{PintMF vignette}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-  ---
+  \usepackage[utf8]{inputenc}
+---
   
   
   ```{r setup, include = FALSE}
@@ -29,6 +29,7 @@ library(tidyverse)
 library(PintMF)
 library(CrIMMix)
 library(future)
+library(mclust)
 ```
 
 ## Simulate data with CrIMMix package
@@ -53,11 +54,13 @@ names(data) <- data_names
 
 ```
 ## Figures Raw data
-```{r, heatmap_plot, fig.width=10, fig.height=5}
-cols.clust <- RColorBrewer::brewer.pal(4, "Set1")[true.clust %>% as.factor] 
-data[[1]] %>%  gplots::heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
-data[[2]] %>%  gplots::heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
-data[[3]] %>%  gplots::heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+```{r, fig.width=10, fig.height=5}
+library(RColorBrewer)
+library(gplots)
+cols.clust <- brewer.pal(4, "Set1")[true.clust %>% as.factor] 
+data[[1]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+data[[2]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+data[[3]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
 ```
 
 ## Run MultiOM and Mocluster
@@ -105,7 +108,7 @@ ggplot(data = RSS_data, aes(x = p)) +theme_bw()+geom_line(aes(y = value))+facet_
 ```
 
 
-```{r, pve}
+```{r, loss}
 p <- iteration[which.min(RSS_data %>% filter(BIC=="BIC.3") %>% select(value) %>% pull %>% round)]
 R <- SolveInt(Y=data_t, p=p, max.it=5, verbose=TRUE, init_flavor="snf", flavor_mod="glmnet")
 df_pve <- data.frame(pve=R$pve, iteration=1:length(R$pve))
@@ -116,18 +119,18 @@ library(gridExtra)
 grid.arrange(g_pve, g_loss, ncol=2)
 ```
 ```{r, run_methods}
+library(CrIMMix)
+R_moclust <- IntMultiOmics(data_t, method="Mocluster", K=4, k= c(0.4, 0.2, 0.6))
+R_intNMF <- IntMultiOmics(data_t, method="intNMF", K=4)
 
-R_moclust <- CrIMMix::IntMultiOmics(data_t, method="Mocluster", K=4, k= c(0.4, 0.2, 0.6))
-R_intNMF <- CrIMMix::IntMultiOmics(data_t, method="intNMF", K=4)
-
-R_SNF <- CrIMMix::IntMultiOmics(data_t, method="SNF", K=4)
+R_SNF <- IntMultiOmics(data_t, method="SNF", K=4)
 ```
 
 
 ## Performance evaluation
 
 ### Clustering
-```{r, clustering}
+```{r, clustering, fig.width=10, fig.height=5}
 clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
 clust_moclust <- R_moclust$clust
 clust_intNMF <- R_intNMF$clust
@@ -135,15 +138,15 @@ clust_intNMF <- R_intNMF$clust
 clust_snf <- R_SNF$clust
 
 true.clusters <- c_1$true.clusters
-cat("my clustering:", mclust::adjustedRandIndex(clust, true.clusters), "\n")
-cat("mocluster clustering:", mclust::adjustedRandIndex(clust_moclust, true.clusters), "\n")
-cat("intNMF clustering:", mclust::adjustedRandIndex(clust_intNMF, true.clusters), "\n")
-cat("SNF clustering:", mclust::adjustedRandIndex(clust_snf, true.clusters), "\n")
-cols <- RColorBrewer::brewer.pal(4, "Set1")
+cat("my clustering:", adjustedRandIndex(clust, true.clusters), "\n")
+cat("mocluster clustering:", adjustedRandIndex(clust_moclust, true.clusters), "\n")
+cat("intNMF clustering:", adjustedRandIndex(clust_intNMF, true.clusters), "\n")
+cat("SNF clustering:", adjustedRandIndex(clust_snf, true.clusters), "\n")
+cols <- brewer.pal(4, "Set1")
 table(true.clusters, clust)
 library(RColorBrewer)
-pal <- rev(RColorBrewer::brewer.pal(10, "RdBu"))
-gplots::heatmap.2(R$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clusters)],
+pal <- rev(brewer.pal(10, "RdBu"))
+heatmap.2(R$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clusters)],
                   col = pal)
 ```
 
@@ -180,10 +183,12 @@ a <- R_moclust$fit@loading
 test <- rowSums(abs(a))
 idx <- which(test!=0)
 est_muclust <- test[idx]
+library(stringr)
 est_muclust <- lapply(1:ndat, function (kk){
   idx <- grep(sprintf("dat%s", kk), names(est_muclust))
   regexp <- "[[:digit:]]+"
-  gsub(sprintf("_dat%s", kk), "", names(est_muclust)[idx]) %>% stringr::str_extract(pattern=regexp)
+  gsub(sprintf("_dat%s", kk), "", names(est_muclust)[idx]) %>%
+    str_extract(pattern=regexp)
 })  
 
 mapply(function(e, t, d) (e %>% intersect(t) %>% length)/d, est_muclust, truth, denom_tp)
@@ -314,8 +319,9 @@ ggplot(rocs, aes(x=fpr, y=tpr, color=method))+geom_line()+scale_x_continuous(lim
 
 
 ```{r,AUCS, fig.width=7}
+library(tis)
 auc <- function (x, y){
-  round(sum(tis::lintegrate(c(x,1), c(y,1), xint=c(x,1))),2)
+  round(sum(lintegrate(c(x,1), c(y,1), xint=c(x,1))),2)
 }
 rocs %>% group_by(method, data) %>% summarize(auc=auc(fpr, tpr)) %>% ggplot(aes(x=method,y=data, fill=auc))+geom_tile()+ scale_fill_distiller(palette = "YlGnBu", direction=1, limits=c(0.5,1))
 
@@ -324,10 +330,9 @@ rocs %>% group_by(method, data) %>% summarize(auc=auc(fpr, tpr)) %>% ggplot(aes(
 ```{r}
 rocs %>% group_by(data, method) %>% summarize(auc=auc(fpr, tpr)) %>% knitr::kable()
 
-df_ARI <- data.frame(method=c("my_method", "mocluster", "NMF", "SNF"), ari=c(mclust::adjustedRandIndex(clust, true.clusters), mclust::adjustedRandIndex(clust_moclust, true.clusters), mclust::adjustedRandIndex(clust_intNMF, true.clusters), 
-                                                                             mclust::adjustedRandIndex(clust_snf, true.clusters)))
-
-df_ARI%>% knitr::kable()
+df_ARI <- data.frame(method=c("my_method", "mocluster", "NMF", "SNF"), ari=c(adjustedRandIndex(clust, true.clusters), adjustedRandIndex(clust_moclust, true.clusters), adjustedRandIndex(clust_intNMF, true.clusters),  adjustedRandIndex(clust_snf, true.clusters)))
+library(knitr)
+df_ARI%>% kable()
 
 ```
 

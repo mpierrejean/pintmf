@@ -1,5 +1,6 @@
 #' SolveInt
 #' @title SolveInt solve equation for H and W
+#'
 #' @param Y observations, list of blocks of data
 #' @param p The number of latent profiles
 #' @param max.it by default 20. Maximum iteration of the algorithm, else until convergence
@@ -11,45 +12,23 @@
 #'   methylation data takes values between 0 and 1.
 #' @param verbose A logical value indicating whether to print extra information.
 #'   Defaults to FALSE
+#' @param flavor_mod glmnet or (oem not implemented yet)
+#' @param init_flavor flavor to initialize W matrix (hclust, SNF, random, pca or svd)
+#' @param ... other arguments
 #'
 #' @return A list that contains :
 #'   \code{H} is a list of matrix (latent profiles for each block of data)
 #'   \code{W} is a matrix (weight matrix).
 #'   \code{loss} vector of the loss of W between two iterations
 #'   \code{pve} Percentage of variance explained
-#' @examples
-#' library(Matrix)
-#' library(tidyverse)
-#' library(multiOM)
-#' library(CrIMMix)
-#' c_1 <- simulateY(J=1000, prop=0.1, noise=1)
-#' c_2 <- simulateY(J=2000, prop=0.05, noise=1)
-#' c_3 <- simulateY(J=5000, prop=0.2,  noise=1)
-#' data <- list(c_1$data , c_2$data , c_3$data)
-#' print(sapply(data,dim))
-#' R <- list()
-#' grid_p <- 2:7
-#' R <- SolveInt(Y=data[c(1,2,3)], p=4, max.it=5, type=c("none", "none", "none"), verbose=TRUE, init_flavor="hclust")
-#' R_moclust <- CrIMMix::IntMultiOmics(data, method="Mocluster", K=4)
-#' library(ggplot2)
-#' gplots::venn(list(true=stringr::str_extract(c_1$positive %>% unlist, "[0-9]+"),
-#'                   estimates=R$H[[1]] %>% apply(1,FUN=function(x) which(x!=0)) %>% unlist %>% unique()))
-#' gplots::venn(list(true=stringr::str_extract(c_2$positive %>% unlist, "[0-9]+"),
-#'                   estimates=R$H[[2]] %>% apply(1,FUN=function(x) which(x!=0)) %>% unlist %>% unique()))
-#'gplots::venn(list(true=stringr::str_extract(c_3$positive %>% unlist, "[0-9]+"),
-#' estimates=R$H[[3]] %>% apply(1,FUN=function(x) which(x!=0)) %>% unlist %>% unique()))
-#' clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
-#' clust_moclust <- R_moclust$clust
-#' true.clusters <- c_1$true.clusters
-#' mclust::adjustedRandIndex(clust, true.clusters)
-#' mclust::adjustedRandIndex(clust_moclust, true.clusters)
-#' heatmap(R$W, scale="none")
 #' @export
 #' @importFrom glmnet glmnet
 #' @importFrom dplyr bind_cols
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan
 #' @importFrom nnet class.ind
+#' @importFrom pcaMethods pca
+#' @import stats
 SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", length(Y)), init_flavor="hclust", verbose=FALSE,...
 ) {
   if (!is.list(Y)) {
@@ -91,13 +70,13 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
     yyt[idx,]
   }
   initH_pca <- function(yyt, p) {
-    lapply(yyt, function (h) pcaMethods::pca(h, nPcs = p)@loadings %>% t)
+    lapply(yyt, function (h) pca(h, nPcs = p)@loadings %>% t)
   }
   initH_svd <- function(yyt, p) {
     lapply(yyt, function (h) svd(h, nv=p)$v %>% t)
   }
   initH_snf <- function(yyt, p) {
-    cluster <- CrIMMix::IntMultiOmics(yyt, method="SNF", K=p)$clust
+    cluster <- init_SNF(yyt, K=p)$clust
     ## Averaged profiles by cluster
     lapply(yyt, function (y) t(sapply(split(as.data.frame(y), f = cluster), FUN = colMeans)))
   }
@@ -125,13 +104,12 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
   Wc <- matrix(0, nrow(Y[[1]]), p)
   while (it <= max.it) {
     if(verbose) message("Solve W\n")
-    plan(multiprocess)
     W.old <- Wc
     Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
     Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
     Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
     if(it==1 & init_flavor=="snf"){
-      Wc <- nnet::class.ind(doSNF(Yt, K=p)$clust)
+      Wc <- class.ind(init_SNF(Yt, K=p)$clust)
     }else{
       Wc <- get.W(Zbar=Zbar,
                   Ybar=Ybar)

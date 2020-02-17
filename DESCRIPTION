@@ -1,20 +1,44 @@
 Package: PintMF
 Type: Package
 Title: Penalized Integrative Matrix Factorization for multi-omics data
-Version: 0.1.1
+Version: 0.1.3-9000
 Date: 2019-10-24
 Author: Morgane Pierre-Jean
-Maintainer: Who to complain to <mpierre@cng.fr>
-Description: Package to perform Penalized Matrix Factorization for multi-omics data sets.
+Maintainer: <mpierrejean.pro@gmail.com>
+Description: Package to perform Penalized Integrative Matrix Factorization for multi-omics data sets.
 License: GPL
 LazyData: TRUE
+VignetteBuilder: knitr
 RoxygenNote: 7.0.1
-Suggests:
+Imports:
     Matrix,
     MASS,
     survival,
     glmnet,
+    dplyr,
+    nnet,
     tidyverse,
     future,
     future.apply,
-    testthat
+    testthat,
+    SNFtool,
+    lsei,
+    pcaMethods,
+    stats
+Suggests:
+    CrIMMix,
+    cluster,
+    CrIMMixdata,
+    gplots,
+    tis,
+    knitr,
+    matrixStats,
+    RColorBrewer,
+    ggplot2,
+    mclust,
+    stringr,
+    gridExtra,
+    tidyr
+    
+    
+    

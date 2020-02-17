@@ -11,31 +11,11 @@ get.H(W, y, flavor_mod = "glmnet", verbose)
 
 \item{y}{observations}
 
+\item{flavor_mod}{This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "oem" (not yet implemented).}
+
 \item{verbose}{A logical value indicating whether to print extra information.
 Defaults to FALSE}
-
-\item{mode}{This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "lars".}
 }
 \description{
 Get.H
-}
-\examples{
-p <- 5
-n <- 10
-W <- rbind(c(1,0,0,0,0),c(1,0,0,0,0),
-          c(0,1,0,0,0),c(0,1,0,0,0) ,
-           c(0,0,1,0,0),c(0,0,1,0,0) ,
-            c(0,0,0,1,0),c(0,0,0,1,0) ,
-             c(0,0,0,0,1),c(0,0,0,0,1) )
-H <- as.matrix(rSpMatrix(p, 100, nnz = 100,
-rand.x= function(nnz) round(rnorm(nnz, 5, 1), 2) ))
-roc <- sapply(c(0.0,0.1, 0.3,0.5, 0.7, 1, 1.2,1.5), function(ss){
-       y <- as.matrix(W\%*\%H + rnorm(20, sd=ss))
-       test <- get.H(W, y=y, t="none", verbose=TRUE)
-       tpr <- length(intersect(which(as.matrix(H)!=0),which(test!=0)))/sum(H!=0)
-       fpr <- length(intersect(which(as.matrix(H)==0),which(test!=0)))/sum(H==0)
-       return(c(fpr=fpr, tpr=tpr))
-       })
-
-
 }

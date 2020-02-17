@@ -18,12 +18,10 @@
 #'
 #' @importFrom glmnet glmnet
 #' @importFrom lsei lsei
-#' @importFrom future.apply future_lapply
 #' @importFrom dplyr %>%
 #' @export
 get.W <- function(Zbar, Ybar) {
-  plan(multiprocess)
-  Wc <-  future_lapply(1:nrow(Ybar), FUN=solvew, Ybar=Ybar, Zbar=Zbar) %>% simplify2array %>% t
+  Wc <-  lapply(1:nrow(Ybar), FUN=solvew, Ybar=Ybar, Zbar=Zbar) %>% simplify2array %>% t
   return(Wc)
 }
 
@@ -33,11 +31,11 @@ solvew <- function(ind, Ybar, Zbar){
   p <- ncol(Zbar)
   fit <-  try(glmnet(x=Zbar, y=ybar,
                       alpha=0,
-                      lower.limit=0,lambda = 1,
+                      lower.limits=0,lambda = 1,
                       intercept=FALSE))
   if (inherits(fit, "try-error")) {
     message("Something wrong occurs, init W with Lsei")
-    w <- try(lsei::lsei(a=Zbar, b=ybar, c=rep(1, p), d=1,lower=0))
+    w <- try(lsei(a=Zbar, b=ybar, c=rep(1, p), d=1,lower=0))
     if (inherits(w, "try-error")) {
       w <- rep(1/p, p)
     }
