@@ -10,8 +10,11 @@ Y3 <- as.matrix(W%*%H3 + rnorm(20, sd=1))
 data <- list(Y1,Y2,Y3)
 test_that("CPenalized MF algorithm test", {
   ## solving with PintMF
-  R <- PintMF::SolveInt(Y=data, p=3, max.it=1)
-  print(R)
+  R <- PintMF::SolveInt(Y=data, p=3, max.it=1, flavor_mod = "glmnet")
+  expect_equal(is.list(R), TRUE)
+  expect_equal(is.matrix(R$W), TRUE)
+  expect_equal(is.list(R$H), TRUE)
+  R <- PintMF::SolveInt(Y=data, p=3, max.it=1, flavor_mod = "ncvreg")
   expect_equal(is.list(R), TRUE)
   expect_equal(is.matrix(R$W), TRUE)
   expect_equal(is.list(R$H), TRUE)

@@ -7,6 +7,7 @@
 #'   Defaults to FALSE
 #' @importFrom glmnet glmnet
 #' @importFrom glmnet cv.glmnet
+#' @importFrom ncreg cv.ncvreg
 #' @importFrom Matrix Matrix
 #' @importFrom Matrix Diagonal
 #' @importFrom future.apply future_apply
@@ -38,38 +39,19 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
       Z <- as.matrix(coef(cvfit)[-1,]) %>% matrix(nrow = p, ncol = J, byrow = FALSE)
       if(verbose) message(sprintf("number of non zero is %s on %s",sum(Z!=0), ncol(Z)*nrow(Z)))
     }
-
-    #system.time(cvfit <- cv.biglasso(W.tilde , y.tilde, seed = 1234,  nfolds=10, ncores=3, nlambda=10))
-    #coefs <- as.matrix(coef(cvfit))
-    ## Go back to Z
-    #ind.best <- which(z.tilde$lambda==cvfit$lambda.1se)
-    #Z <- as.matrix(z.tilde$beta)[, ind.best] %>% matrix(nrow = p, ncol = J, byrow = FALSE)
-    res <- round(Z,2)
+    Z <- round(Z,2)
   }
-  if(flavor_mod=="mglmnet"){
-    cvfit <- try(cv.glmnet(W, y,family="mgaussian",
+  if(flavor_mod=="ncvreg"){
+    ## Lasso regression
+    W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix
+    #W.tilde <- kronecker(diag(J), W) %>% as.big.matrix()
+    y.tilde <- (as.numeric(y))
+    cvfit <- try(cv.ncvreg(W.tilde, y.tilde,
                            intercept=FALSE,
-                           nfolds=5, parallel=TRUE))
-    Z <- as.matrix(do.call(cbind, coef(cvfit)) [-1,])
-
-
-    #system.time(cvfit <- cv.biglasso(W.tilde , y.tilde, seed = 1234,  nfolds=10, ncores=3, nlambda=10))
-    #coefs <- as.matrix(coef(cvfit))
-    ## Go back to Z
-    #ind.best <- which(z.tilde$lambda==cvfit$lambda.1se)
-    #Z <- as.matrix(z.tilde$beta)[, ind.best] %>% matrix(nrow = p, ncol = J, byrow = FALSE)
-    res <- round(Z,2)
+                        penalty = "lasso",
+                           nfolds=5))
+    Z <-  coef(cvfit)[-1]%>% matrix(nrow = p, ncol = J, byrow = FALSE)
+    Z <- round(Z,2)
   }
-  print(flavor_mod)
-  if(flavor_mod=="parallel"){
-    if(verbose) message(sprintf("Parallele future Mode thanks HB"))
-
-    Z <- future_apply(y, 2,function(yy) {
-      h <- cv.glmnet(x=W, y=yy, intercept = FALSE)
-      coef(h)[-1,]
-    })
-    if(verbose) message(sprintf("number of non zero is %s on %s",sum(Z!=0), ncol(Z)*nrow(Z)))
-    res <- round(Z,2)
-  }
-  return(res)
+  return(Z)
 }
