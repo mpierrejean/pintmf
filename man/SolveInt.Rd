@@ -42,7 +42,7 @@ Defaults to FALSE}
 A list that contains :
   \code{H} is a list of matrix (latent profiles for each block of data)
   \code{W} is a matrix (weight matrix).
-  \code{loss} vector of the loss of W between two iterations
+  \code{loss} similarity of the clustering between two iterations
   \code{pve} Percentage of variance explained
 }
 \description{

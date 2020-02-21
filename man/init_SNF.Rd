@@ -4,14 +4,12 @@
 \alias{init_SNF}
 \title{init_SNF}
 \usage{
-init_SNF(data, K, K_n = 10, sigma = 0.5)
+init_SNF(data, K, sigma = 0.5)
 }
 \arguments{
 \item{data}{List of matrices.}
 
 \item{K}{Number of clusters}
-
-\item{K_n}{Number of nearest neighbors}
 
 \item{sigma}{Variance for local model}
 }
