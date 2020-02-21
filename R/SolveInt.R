@@ -19,7 +19,7 @@
 #' @return A list that contains :
 #'   \code{H} is a list of matrix (latent profiles for each block of data)
 #'   \code{W} is a matrix (weight matrix).
-#'   \code{loss} vector of the loss of W between two iterations
+#'   \code{loss} similarity of the clustering between two iterations
 #'   \code{pve} Percentage of variance explained
 #' @export
 #' @importFrom glmnet glmnet
@@ -29,7 +29,7 @@
 #' @importFrom nnet class.ind
 #' @importFrom pcaMethods pca
 #' @import stats
-SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", length(Y)), init_flavor="hclust", verbose=FALSE,...
+SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", length(Y)), init_flavor="snf", verbose=FALSE,...
 ) {
   if (!is.list(Y)) {
     stop("Y is not a list")
@@ -75,11 +75,7 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
   initH_svd <- function(yyt, p) {
     lapply(yyt, function (h) svd(h, nv=p)$v %>% t)
   }
-  initH_snf <- function(yyt, p) {
-    cluster <- init_SNF(yyt, K=p)$clust
-    ## Averaged profiles by cluster
-    lapply(yyt, function (y) t(sapply(split(as.data.frame(y), f = cluster), FUN = colMeans)))
-  }
+
   if(verbose) message (sprintf("Init Hc \n"))
 
   if(init_flavor=="hclust"){
@@ -88,9 +84,6 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
   if(init_flavor=="svd"){
     Hc <- initH_svd(Yt, p )
   }
-  if(init_flavor=="SNF"){
-    Hc <- initH_snf(Yt, p )
-  }
   if(init_flavor=="pca"){
     Hc <- initH_pca(Yt, p )
   }else{
@@ -98,42 +91,51 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
   }
 
   it <- 1
-  loss <- c(100)
+  loss <- numeric(0)
   pve <- numeric(0)
   print(p)
   Wc <- matrix(0, nrow(Y[[1]]), p)
   while (it <= max.it) {
     if(verbose) message("Solve W\n")
     W.old <- Wc
+
     Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
     Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
     Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
     if(it==1 & init_flavor=="snf"){
+
       Wc <- class.ind(init_SNF(Yt, K=p)$clust)
+      W.old <- Wc
+
     }else{
+
       Wc <- get.W(Zbar=Zbar,
                   Ybar=Ybar)
-    }
-    if(verbose) message ("Solve Hc\n")
-    Hc <- future_lapply(1:length(Yt), function(yy){
-      if(verbose){
-        message(sprintf("Solve data number %s:",yy))
+      if(it==1){
+        W.old <- Wc
       }
-      print(flavor_mod)
-      get.H(y = Yt[[yy]], W = Wc, flavor_mod=flavor_mod, verbose)}
-    )
+    }
+    loss[it ] <- Wc %>% dist %>% hclust(method="ward.D2") %>% cutree(p) %>%mclust::adjustedRandIndex(W.old %>% dist %>% hclust(method="ward.D2") %>% cutree(p))
+    message(sprintf("Loss equal to %s", loss[it]))
+    if(loss[it] >0.1){
+      if(verbose) message ("Solve Hc\n")
+      Hc <- future_lapply(1:length(Yt), function(yy){
+        if(verbose){
+          message(sprintf("Solve data number %s:",yy))
+        }
+        print(flavor_mod)
+        get.H(y = Yt[[yy]], W = Wc, flavor_mod=flavor_mod, verbose)}
+      )
 
-
-    loss[it + 1] <- sum((Wc - W.old)^2)/(ncol(Wc)*nrow(Wc))
-    pve[it] <- PVE(Yt, Hc, Wc)
-    if(verbose) (sprintf("loss : %s\n", round(loss[it + 1],2)))
-    it <- it + 1
-    if(verbose) message(sprintf("iteration number %s", cat(it, "\n")))
-  }
-  stop_ind=FALSE
-  if (!all(colSums(Wc) > 0)) {
-    cat("At least one column is zero, you should be run the algorithm with less latent variables\n")
-    stop_ind=TRUE
+      pve[it] <- PVE(Yt, Hc, Wc)
+      if(verbose) (sprintf("loss : %s\n", round(loss[it + 1],2)))
+      it <- it + 1
+      if(verbose) message(sprintf("iteration number %s", cat(it, "\n")))
+    }else{
+      message(sprintf("The clusterings are too different between two iterations: stop here"))
+      Wc <- W.old
+      it <- max.it+1
+    }
   }
   ## Define names of variables
   var_names <- lapply(Y, colnames)
@@ -142,5 +144,5 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
     colnames(h) = var_names[[ii]]
     return(h)
   })
-  return(list(H = Hc, W = Wc, loss = loss, pve = pve, stop_ind=stop_ind))
+  return(list(H = Hc, W = Wc,  loss = loss, pve = pve))
 }

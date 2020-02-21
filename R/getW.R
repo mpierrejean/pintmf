@@ -33,7 +33,7 @@ solvew <- function(ind, Ybar, Zbar){
                       alpha=0,
                       lower.limits=0,lambda = 1,
                       intercept=FALSE))
-  if (inherits(fit, "try-error")) {
+  if (inherits(fit, "try-error")|sum(fit$beta)==0) {
     message("Something wrong occurs, init W with Lsei")
     w <- try(lsei(a=Zbar, b=ybar, c=rep(1, p), d=1,lower=0))
     if (inherits(w, "try-error")) {

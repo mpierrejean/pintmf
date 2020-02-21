@@ -10,7 +10,7 @@ SolveInt(
   max.it = 20,
   flavor_mod = "glmnet",
   type = rep("none", length(Y)),
-  init_flavor = "hclust",
+  init_flavor = "snf",
   verbose = FALSE,
   ...
 )
