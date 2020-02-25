@@ -12,6 +12,10 @@
 #' @importFrom Matrix Diagonal
 #' @importFrom future.apply future_apply
 #' @importFrom dplyr %>%
+#' @importFrom bigmemory as.big.matrix
+#' @importFrom biglasso cv.biglasso
+#' @importFrom quadrupen slot
+#' @importFrom quadrupen crossval
 #' @export
 get.H <- function(W, y, flavor_mod="glmnet", verbose) {
   J <- ncol(y)
@@ -52,6 +56,21 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
                            nfolds=5))
     Z <-  coef(cvfit)[-1]%>% matrix(nrow = p, ncol = J, byrow = FALSE)
     Z <- round(Z,2)
+  }
+  if(flavor_mod=="biglasso"){
+    ## Lasso regression
+    W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix%>% as.big.matrix()
+    #W.tilde <- kronecker(diag(J), W) %>% as.big.matrix()
+    y.tilde <- (as.numeric(y))
+    fit <- cv.biglasso(X = W.tilde, y = y.tilde)
+    Z <-  coef(fit)[-1]%>% matrix(nrow = p, ncol = J, byrow = FALSE)
+  }
+  if(flavor_mod=="quadrupen"){
+    W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix
+    #W.tilde <- kronecker(diag(J), W) %>% as.big.matrix()
+    y.tilde <- (as.numeric(y))
+    beta.lasso <- slot(crossval(x=W.tilde,y=y.tilde, penalty="elastic.net", mc.cores=2,intercept=FALSE, K = 5) , "beta.min")
+    Z <-   beta.lasso%>% matrix(nrow = p, ncol = J, byrow = FALSE)
   }
   return(Z)
 }
