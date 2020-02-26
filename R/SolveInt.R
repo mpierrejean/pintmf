@@ -29,7 +29,7 @@
 #' @importFrom nnet class.ind
 #' @importFrom pcaMethods pca
 #' @import stats
-SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", length(Y)), init_flavor="snf", verbose=FALSE,...
+SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep("none", length(Y)), init_flavor="snf", verbose=FALSE,...
 ) {
   if (!is.list(Y)) {
     stop("Y is not a list")
@@ -56,10 +56,20 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
                  return(y)
                })
   Yt <- Y
-  dd <- lapply(Yt, dist)
-  hc <- lapply(dd, hclust, method = "ward.D")
-  ## initialization of H
+  if(verbose) message(sprintf("method used is %s:",flavor_mod))
 
+  ############################################################
+  ############ Group
+  ############################################################
+  if(!is.null(group)){
+    if (nrow(Y[[1]])!=length(group)) {
+      stop(sprintf("group must be a vector of length %s", nrow(Y[[1]])))
+    }
+  }
+
+  ############################################################
+  ############ initialization
+  ############################################################
   initH_clust <- function(yyt, hhc, pp) {
     cluster <- cutree(hhc, k = pp)
     ## Averaged profiles by cluster
@@ -78,6 +88,9 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
 
   if(verbose) message (sprintf("Init Hc \n"))
 
+  dd <- lapply(Yt, dist)
+  hc <- lapply(dd, hclust, method = "ward.D")
+
   if(init_flavor=="hclust"){
     Hc <- mapply(initH_clust,Yt,hc, rep(p, length(Y)), SIMPLIFY = FALSE)
   }
@@ -86,44 +99,52 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",  type=rep("none", len
   }
   if(init_flavor=="pca"){
     Hc <- initH_pca(Yt, p )
-  }else{
+  }
+  if(init_flavor=="random"){
     Hc <- mapply(initH_random,Yt, rep(p, length(Y)), SIMPLIFY = FALSE)
   }
 
   it <- 1
   loss <- numeric(0)
   pve <- numeric(0)
-  print(p)
   Wc <- matrix(0, nrow(Y[[1]]), p)
   while (it <= max.it) {
     if(verbose) message("Solve W\n")
-    W.old <- Wc
+    if(is.null(group)){
+      Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
+      Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
+      Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
+      if(it==1 & init_flavor=="snf"){
 
-    Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
-    Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
-    Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
-    if(it==1 & init_flavor=="snf"){
-
-      Wc <- class.ind(init_SNF(Yt, K=p)$clust)
-      W.old <- Wc
-
-    }else{
-
-      Wc <- get.W(Zbar=Zbar,
-                  Ybar=Ybar)
-      if(it==1){
+        Wc <- class.ind(init_SNF(Yt, K=p)$clust)
         W.old <- Wc
+
+      }else{
+
+        Wc <- get.W(Zbar=Zbar,
+                    Ybar=Ybar)
+        if(it==1){
+          W.old <- Wc
+        }
+      }
+    }else{
+      if(it==1){
+        Wc <- class.ind(group)
+        W.old <- Wc
+      }else{
+        Wc <- get.W.supervised(Zbar=Zbar,
+                    Ybar=Ybar, group=group)
       }
     }
+
     loss[it ] <- Wc %>% dist %>% hclust(method="ward.D2") %>% cutree(p) %>%mclust::adjustedRandIndex(W.old %>% dist %>% hclust(method="ward.D2") %>% cutree(p))
-    message(sprintf("Loss equal to %s", loss[it]))
+    if(verbose) message(sprintf("Loss equal to %s", loss[it]))
     if(loss[it] >0.1){
       if(verbose) message ("Solve Hc\n")
       Hc <- future_lapply(1:length(Yt), function(yy){
         if(verbose){
           message(sprintf("Solve data number %s:",yy))
         }
-        print(flavor_mod)
         get.H(y = Yt[[yy]], W = Wc, flavor_mod=flavor_mod, verbose)}
       )
 

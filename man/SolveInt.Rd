@@ -9,6 +9,7 @@ SolveInt(
   p,
   max.it = 20,
   flavor_mod = "glmnet",
+  group = NULL,
   type = rep("none", length(Y)),
   init_flavor = "snf",
   verbose = FALSE,

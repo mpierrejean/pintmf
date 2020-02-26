@@ -14,7 +14,7 @@
 #' @importFrom dplyr %>%
 #' @importFrom bigmemory as.big.matrix
 #' @importFrom biglasso cv.biglasso
-#' @importFrom quadrupen slot
+#' @importFrom methods slot
 #' @importFrom quadrupen crossval
 #' @export
 get.H <- function(W, y, flavor_mod="glmnet", verbose) {

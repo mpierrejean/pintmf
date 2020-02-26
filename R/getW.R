@@ -52,3 +52,4 @@ solvew <- function(ind, Ybar, Zbar){
   }
   return(round(w, 1))
 }
+

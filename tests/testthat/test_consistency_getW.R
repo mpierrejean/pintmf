@@ -9,7 +9,7 @@ Y2 <- as.matrix(W%*%H2 + rnorm(20, sd=1))
 Y3 <- as.matrix(W%*%H3 + rnorm(20, sd=1))
 Ybar <- cbind(Y1, Y2, Y3)
 Zbar <- cbind(H1, H2, H3) %>% t
-
+group <- apply(W, 1, which.max)
 test_that("Consistency of get.W", {
   ## solving with PintMF
   We <- PintMF::get.W(Zbar, Ybar)
@@ -17,8 +17,15 @@ test_that("Consistency of get.W", {
   expect_equal(is.matrix(We), TRUE)
   expect_equal(ncol(We), ncol(W))
   expect_equal(nrow(We), nrow(W))
-
 })
 
 
 
+test_that("Consistency of get.W in supervised way", {
+  ## solving with PintMF
+  We <- PintMF::get.W.supervised(Zbar, Ybar, group=group)
+  expect_equal(is.matrix(We), TRUE)
+  expect_equal(ncol(We), ncol(W))
+  expect_equal(nrow(We), nrow(W))
+  print(We)
+})
