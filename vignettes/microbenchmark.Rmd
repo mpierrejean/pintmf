@@ -1,0 +1,33 @@
+---
+title: "microbenchmark"
+author: "Morgane Pierre-Jean"
+date: "21/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+set.seed(33)
+W <- rbind(diag(1, nrow = 3, ncol = 3), diag(1, nrow = 3, ncol = 3))
+H1 <- as.matrix(rSpMatrix(3, 100, nnz = 20, rand.x= function(nnz) round(rnorm(nnz, 2, 0.2), 2) ))
+Y1 <- as.matrix(W%*%H1 + rnorm(20, sd=1))
+library(microbenchmark)
+mbm = microbenchmark(
+  glmnet = PintMF::get.H(W, Y1, flavor_mod = "glmnet", verbose=TRUE),
+  ncvreg = PintMF::get.H(W, Y1, flavor_mod = "ncvreg", verbose=TRUE),
+  bigmemory = PintMF::get.H(W, Y1, flavor_mod = "biglasso", verbose=TRUE),
+  quadrupen = PintMF::get.H(W, Y1, flavor_mod = "quadrupen", verbose=TRUE)
+)
+library(ggplot2)
+g <- autoplot(mbm)+theme_bw()
+ggsave(filename = "../../../papers/NAR-LaTeX-20170208/eval_perf_lasso.eps", width = 6, height = 6)
+```
