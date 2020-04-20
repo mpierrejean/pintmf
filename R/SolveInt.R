@@ -111,16 +111,16 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
   while (it <= max.it) {
     if(verbose) message("Solve W\n")
     if(is.null(group)){
-      Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
-      Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
-      Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
+
       if(it==1 & init_flavor=="snf"){
 
         Wc <- class.ind(init_SNF(Yt, K=p)$clust)
         W.old <- Wc
 
       }else{
-
+        Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
+        Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
+        Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
         Wc <- get.W(Zbar=Zbar,
                     Ybar=Ybar)
         if(it==1){
@@ -132,12 +132,16 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
         Wc <- class.ind(group)
         W.old <- Wc
       }else{
+        Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
+        Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
+        Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
         Wc <- get.W.supervised(Zbar=Zbar,
                     Ybar=Ybar, group=group)
       }
     }
 
-    loss[it ] <- Wc %>% dist %>% hclust(method="ward.D2") %>% cutree(p) %>%mclust::adjustedRandIndex(W.old %>% dist %>% hclust(method="ward.D2") %>% cutree(p))
+    loss[it ] <- Wc %>% dist %>% hclust(method="ward.D2") %>% cutree(p) %>%
+      mclust::adjustedRandIndex(W.old %>% dist %>% hclust(method="ward.D2") %>% cutree(p))
     if(verbose) message(sprintf("Loss equal to %s", loss[it]))
     if(loss[it] >0.1){
       if(verbose) message ("Solve Hc\n")
