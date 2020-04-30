@@ -22,7 +22,7 @@ test_that("CPenalized MF algorithm test", {
 
 test_that("CPenalized MF algorithm test supervised", {
   ## solving with PintMF
-  group <- apply(W, 1,which.max)
+  group <- apply(W, 1, which.max)
   R <- PintMF::SolveInt(Y=data, p=3, max.it=3, flavor_mod = "glmnet", group=group)
   expect_equal(is.list(R), TRUE)
   expect_equal(is.matrix(R$W), TRUE)

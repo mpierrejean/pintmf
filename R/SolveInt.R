@@ -5,6 +5,8 @@
 #' @param p The number of latent profiles
 #' @param max.it by default 20. Maximum iteration of the algorithm, else until convergence
 #'   of matrix W
+#' @param group default is NULL (unsupervised way) otherwise the W matrix is
+#'   fixed and algorithm is run in a supervised way.
 #' @param type type of data (by default all are "none"),
 #'   can take values into \code{ c("none", "methylation", "mutation")},
 #'   this argument allows to adapt modelisation by adding constraints.
@@ -62,8 +64,16 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
   ############ Group
   ############################################################
   if(!is.null(group)){
+    if(!is.numeric(group)){
+      if(is.character(group)){
+        warning(sprintf("group must be a numeric vector \n variable group has been transformed to a numeric variable"))
+        group = as.numeric(as.factor(group))
+      }else{
+        stop(sprintf("group must be a numeric or character vector of length %s", nrow(Y[[1]])))
+        }
+    }
     if (nrow(Y[[1]])!=length(group)) {
-      stop(sprintf("group must be a vector of length %s", nrow(Y[[1]])))
+      stop(sprintf("group must be a numeric vector of length %s", nrow(Y[[1]])))
     }
   }
 

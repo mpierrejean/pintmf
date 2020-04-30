@@ -26,6 +26,9 @@ of matrix W}
 
 \item{flavor_mod}{glmnet or (oem not implemented yet)}
 
+\item{group}{default is NULL (unsupervised way) otherwise the W matrix is
+fixed and algorithm is run in a supervised way.}
+
 \item{type}{type of data (by default all are "none"),
 can take values into \code{ c("none", "methylation", "mutation")},
 this argument allows to adapt modelisation by adding constraints.

@@ -1,5 +1,9 @@
 Package: PintMF
 ==============
+Version: 0.1.3-9000 [2020-04-23]
+  o Clean up and check
+  o Add other method to perform H inference
+  o Now several type of initialization are available
 Version: 0.1.3-9000 [2020-02-13]
   o Clean up and check
 Version: 0.1.2-9000 [2019-10-25]

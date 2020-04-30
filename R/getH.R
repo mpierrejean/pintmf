@@ -12,10 +12,10 @@
 #' @importFrom Matrix Diagonal
 #' @importFrom future.apply future_apply
 #' @importFrom dplyr %>%
-#' @importFrom bigmemory as.big.matrix
 #' @importFrom biglasso cv.biglasso
 #' @importFrom methods slot
 #' @importFrom quadrupen crossval
+#' @importFrom bigmemory as.big.matrix
 #' @export
 get.H <- function(W, y, flavor_mod="glmnet", verbose) {
   J <- ncol(y)

@@ -1,7 +1,7 @@
 Package: PintMF
 Type: Package
 Title: Penalized Integrative Matrix Factorization for multi-omics data
-Version: 0.1.3-9000
+Version: 0.1.4-9000
 Date: 2019-10-24
 Author: Morgane Pierre-Jean
 Maintainer: <mpierrejean.pro@gmail.com>
@@ -24,7 +24,12 @@ Imports:
     SNFtool,
     lsei,
     pcaMethods,
-    stats
+    stats,
+    ncvreg,
+    biglasso,
+    bigmemory,
+    methods,
+    quadrupen
 Suggests:
     CrIMMix,
     cluster,
@@ -39,6 +44,6 @@ Suggests:
     stringr,
     gridExtra,
     tidyr
-    
+   
     
     
