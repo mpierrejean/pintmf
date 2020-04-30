@@ -91,7 +91,7 @@ list_sim <- lapply(1:n_batch, function (b){
   prot = prot_dat[[b]][, -c(1:6, ncol(prot_dat[[b]]))]
   rownames(prot) <- prot_dat[[b]][,1]
   pat <- rownames(prot) %>% sort
-  return(list(meth=meth[pat,], exp=exp[pat,], prot=prot[pat,], methpos=m$Pos[c(which(m$Metylation_type=="eQTM"), which(m$Theta!=0))]))
+  return(list(meth=meth[pat,], exp=as.matrix(exp[pat,]), prot=as.matrix(prot[pat,]), methpos=as.character(m$Pos[c(which(m$Metylation_type=="eQTM"), which(m$Theta!=0))])))
 })
 saveRDS(object = list_sim, file="inst/extdata/OMICSSIMLA.rds")
 ```
