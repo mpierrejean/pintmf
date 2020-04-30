@@ -1,0 +1,480 @@
+---
+title: PintMF vignette
+author: "Morgane Pierre-Jean"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+fig_align: "center"
+fig_width: 15
+fig_height: 10
+vignette: >
+  %\VignetteIndexEntry{PintMF vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+  
+  
+  ```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+```
+
+# Introduction
+
+This document shows the results obtained with our method (PintMF) compared to 3 others methods: SNF, MoCluster and intNMF.
+
+We simulate a dataset and we run the methods. We compute the ARI to evaluate the performance of the clustering but also the ROC curve to evaluate the variable selection.
+
+## Useful packages
+
+```{r, library}
+library(Matrix)
+library(tidyverse)
+library(PintMF)
+library(CrIMMix)
+library(future)
+library(mclust)
+library(tidyr)
+library(RColorBrewer)
+library(future.apply)
+library(gplots)
+library(gridExtra)
+library(tis)
+library(stringr)
+
+
+```
+
+# Methods 
+
+## Simulate data with CrIMMix package
+
+We simulate 3 blocs with the same number of individuals (50) but various number of variables. The three blocs mimic various types of omics data with 3 types of distribution (Gaussian, Binary and Beta-like).
+
+```{r, simulations}
+set.seed(444)
+nclust <- 4
+nByclust= c(5, 10, 25, 10)
+c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.05, noise=1)
+c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary",
+                 params=list(c(p=0.6)), prop=0.1, noise=0.3)
+
+params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
+c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000,flavor="beta", 
+                 params=params_beta, prop=0.1, noise=0.2)
+data <- list(c_1$data, c_2$data, c_3$data)
+
+true.clust <- c_1$true.clusters
+print(sapply(data,dim))
+data_names <- c("gaussian", "binary", "beta-like")
+names(data) <- data_names
+
+```
+
+## Figures Raw data
+
+Here, we plot the heatmap of each bloc.
+
+```{r, heatmap, fig.width=10, fig.height=5}
+
+cols.clust <- brewer.pal(4, "Set1")[true.clust %>% as.factor] 
+data[[1]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+data[[2]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+data[[3]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
+```
+
+## Run PintMF
+
+We run PintMF with various number of latent variables.
+
+```{r run_my_meth, message=FALSE}
+data_t <- data
+data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
+R_p <- future_lapply(2:10, function(p) SolveInt(Y=data_t, p=p, max.it=3, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet"))
+```
+
+Here we compute the loss and the BIC in order to select the right number of latent variables.
+
+```{r, pve}
+loss <- sapply(R_p, function (rr){
+  W <- rr$W
+  l <- sapply(1:length(rr$H), function (ii) {
+    h <- rr$H[[ii]]
+    y <- data_t[[ii]]
+    sum((y-W%*%h)^2)/(nrow(W))
+  })
+  mean(l)
+})
+pves <- sapply(R_p, function (rr){
+  rr$pve[2]
+})
+loss_W <- sapply(R_p, function (rr){
+  W <- rr$W
+  sum(W^2)/ncol(W)
+})
+```
+
+```{r}
+iteration <- 2:10
+df_pve <- data.frame(pve=loss_W, iteration=iteration)
+pen <- 2*(sapply(data_t, sd) %>% mean)
+ggplot(df_pve, aes(x=iteration, y=pve+pen*iteration))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)
+```
+
+```{r, BIC}
+RSS_data_mat <- sapply(R_p, computeLL, Y=data_t)
+RSS_data <-  RSS_data_mat %>% t %>% data.frame
+
+BIC <- sapply(seq(from=0.1, to =2, length=5), function (pen) apply(RSS_data_mat, 2, compute_BIC, pen = pen)[1,])
+RSS_data <-  RSS_data_mat %>% t %>% data.frame %>% cbind(BIC= BIC) %>% pivot_longer( cols = starts_with("BIC"),names_to = "BIC")
+```
+
+```{r, plot RSS}
+ggplot(data = RSS_data, aes(x = p)) +theme_bw()+geom_line(aes(y = value))+facet_wrap(.~BIC, scale="free")
+
+```
+
+
+```{r, pintMFopt}
+p <- iteration[which.min(RSS_data %>% filter(BIC=="BIC.3") %>% select(value) %>% pull %>% round)]
+R <- SolveInt(Y=data_t, p=p, max.it=4, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+```
+
+## Cross validation  ARI
+
+
+
+
+
+```{r, cv_pint}
+R_cv_ari <- sapply(1:nrow(data_t[[1]]), function (ii){
+  d <- lapply(data_t, function (dd) dd[-ii, ])
+  R <- SolveInt(Y=d, p=p, max.it=4, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+  clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
+  ari <- adjustedRandIndex(clust, true.clusters[-ii])
+})
+```
+
+
+
+```{r}
+df_pve <- data.frame(pve=R$pve, iteration=1:length(R$pve))
+g_pve <- ggplot(df_pve, aes(x=iteration, y=pve))+geom_point()+theme_bw()+geom_line()+ylim(c(0, max(df_pve$pve)))
+df_loss <- data.frame(loss=R$loss[-1], iteration=1:length(R$loss[-1]))
+g_loss <- ggplot(df_loss, aes(x=iteration, y=loss))+geom_point()+theme_bw()+geom_line()
+grid.arrange(g_pve, g_loss, ncol=2)
+```
+
+
+
+```{r, run_methods}
+R_moclust <- IntMultiOmics(data_t, method="Mocluster", K=4, k= c(0.4, 0.2, 0.6))
+R_intNMF <- IntMultiOmics(data_t, method="intNMF", K=4)
+R_SNF <- IntMultiOmics(data_t, method="SNF", K=4)
+```
+
+
+# Performance evaluation
+
+In this section we evaluate the performance of the 4 methods. We first compute the ARI to evaluate the ability of each method to recover the right classification
+
+## Clustering
+
+```{r, clustering, fig.width=7.5, fig.height=5}
+clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
+clust_moclust <- R_moclust$clust
+clust_intNMF <- R_intNMF$clust
+
+clust_snf <- R_SNF$clust
+
+true.clusters <- c_1$true.clusters
+cat("my clustering:", adjustedRandIndex(clust, true.clusters), "\n")
+cat("mocluster clustering:", adjustedRandIndex(clust_moclust, true.clusters), "\n")
+cat("intNMF clustering:", adjustedRandIndex(clust_intNMF, true.clusters), "\n")
+cat("SNF clustering:", adjustedRandIndex(clust_snf, true.clusters), "\n")
+cols <- brewer.pal(4, "Set1")
+table(true.clusters, clust)
+pal <- rev(brewer.pal(10, "RdBu"))
+heatmap.2(R$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clusters)],
+          col = pal)
+```
+
+## Variable selection
+
+Then, we evaluate if the methods are able to find the correct variables in the three blocs that drive the clustering.
+
+```{r}
+list_non_neg <- R$H[[1]] %>% apply(1, function (ll) names(ll)[which(ll!=0)])
+names(list_non_neg) <- c("f1", "f2", "f3", "f4")
+ll <- UpSetR::fromList(list_non_neg)
+UpSetR::upset(ll)
+```
+
+### TPR and FPR
+
+```{r, ROC_eval}
+truth <- lapply(lapply(list(c_1$positive %>% unlist %>% unique, 
+                            c_2$positive%>% unlist %>% unique, 
+                            c_3$positive%>% unlist %>% unique) , stringr::str_remove_all, pattern="gene"), as.numeric)
+
+est_multiom <- lapply(R$H, function (rr) {
+  rr%>% 
+    apply(1,FUN=function(x) which(abs(x)>quantile(abs(x), 0.85))) %>% 
+    unlist %>% 
+    unique()
+})
+
+ndat <- data %>% length
+J <- sapply(data, ncol)
+
+denom_tp <- sapply(truth, length)
+mapply(function(e, t, d) (e %>% intersect(t) %>% length)/d, est_multiom, truth, denom_tp)
+mapply(function(e, t, d, j) (e %>% setdiff(t) %>% length)/(j-d), est_multiom, truth, denom_tp, J)
+```
+
+
+### ROC Figures
+
+```{r, roc_multiom, fig.width=7}
+H_transformed <- R$H
+
+H_coef <- lapply(H_transformed, function (hh) apply(abs(hh), 2, sum))
+
+H_sorted <- lapply(H_coef, order,decreasing = TRUE)
+ndat <- length(H_sorted)
+
+TPR_compute <- function(truth, selected_var,nvar=NULL){
+  ndat <- length(truth)
+  denom_tp <- sapply(truth, length)
+  tp <- lapply(1:ndat, function(ii){
+    if(is.null(nvar)){nvar= length(selected_var[[ii]])}
+    ho <- selected_var[[ii]][1:nvar]
+    sapply(1:length(ho), function (tt){
+      t <- 1:tt
+      tpr <- (ho[t] %>% intersect(truth[[ii]]) %>% length)/denom_tp[ii]
+    })
+  })
+  return(tp)
+}
+
+FPR_compute <- function(truth, selected_var, J,nvar=NULL){
+  ndat <- length(truth)
+  denom_tp <- sapply(truth, length)
+  fp <- lapply(1:ndat, function(ii){
+    if(is.null(nvar)){nvar= length(selected_var[[ii]])}
+    ho <- selected_var[[ii]][1:nvar]
+    sapply(1:length(ho), function (tt){
+      t <- 1:tt
+      fpr <- (ho[t]%>% setdiff(truth[[ii]]) %>% length)/(J[ii]-denom_tp[ii])
+    })
+  })
+  return(fp)
+}
+
+TPR_list <- TPR_compute(truth, H_sorted)
+FPR_list <- FPR_compute(truth, H_sorted, J)
+
+
+
+roc_eval <- list(FPR=FPR_list, TPR=TPR_list) 
+ROC_df <- do.call(rbind, lapply(1:ndat, function (ii){
+  fpr <- roc_eval$FPR[[ii]]
+  tpr <- roc_eval$TPR[[ii]]
+  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
+}))
+ggplot(ROC_df, aes(x=fpr, y=tpr, color=data, type=data))+geom_line()+scale_x_continuous(limits=c(0,1))+scale_y_continuous(limits=c(0,1))+theme_bw()+geom_abline(slope=1, intercept=0)
+
+```
+
+```{r, cv_pint}
+R_cv_tpr <- lapply(1:nrow(data_t[[1]]), function (ii){
+  d <- lapply(data_t, function (dd) dd[-ii, ])
+  R <- SolveInt(Y=d, p=p, max.it=4, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+  return(R$H)
+})
+
+sort_Hs <- lapply(R_cv_tpr, function(hh){
+  H_coef <- lapply(hh, function (h) apply(abs(h), 2, sum))
+})
+
+H1_sum <- sapply(sort_Hs, function (ii){
+  h1 <- ii[[1]]> quantile(ii[[1]],0.85)
+}) %>% rowSums
+
+H2_sum <- sapply(sort_Hs, function (ii){
+  h1 <- ii[[2]]> quantile(ii[[2]],0.85)
+}) %>% rowSums() 
+
+H3_sum <- sapply(sort_Hs, function (ii){
+  h1 <- ii[[3]]> quantile(ii[[3]],0.85)
+}) %>% rowSums() 
+
+H_sum <- lapply(list(H1_sum, H2_sum, H3_sum), function (hh) which(hh>50*0.50))
+
+TPR_compute(truth,H_sum) %>% sapply(max)
+FPR_compute(truth,H_sum, J) %>% sapply(max)
+```
+
+
+
+### Top 10
+
+```{r}
+TPR_compute(truth, H_sorted, 100) %>% sapply( max)
+FPR_compute(truth, H_sorted, J, 100) %>%sapply(max)
+```
+
+
+```{r, roc_intNMF, fig.width=7}
+H_transformed_nmf <- R_intNMF$fit$H
+H_coef_nmf<- lapply(H_transformed_nmf, function (hh) colSums(abs(hh)))
+
+H_sorted_nmf <- lapply(H_coef_nmf, order,decreasing = TRUE)
+ndat <- length(H_sorted_nmf)
+
+TPR_list <- TPR_compute(truth, H_sorted_nmf)
+FPR_list <- FPR_compute(truth, H_sorted_nmf, J)
+data_names <- c("gaussian", "binary", "beta-like")
+
+roc_eval <- list(FPR=FPR_list, TPR=TPR_list) 
+ROC_df_nmf <- do.call(rbind, lapply(1:ndat, function (ii){
+  fpr <- roc_eval$FPR[[ii]]
+  tpr <- roc_eval$TPR[[ii]]
+  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
+}))
+
+```
+
+
+```{r, roc_mocluster, fig.width=7}
+
+fit <- R_moclust$fit
+a <- fit@loading
+J <- sapply(fit@data, nrow)
+regexp <- "[[:digit:]]+"
+ndat <- length(R_moclust$fit@data )
+
+sumA <- rowSums(abs(a))
+sumA_order <- sort(sumA, decreasing = TRUE) %>% names
+sumA_order <- lapply(1:ndat, function (kk){
+  idx <- grep(sprintf("dat%s", kk), sumA_order)
+  gsub(sprintf("_dat%s", kk), "", sumA_order[idx]) %>% str_extract(pattern=regexp)
+})
+
+TPR_list <- TPR_compute(truth, sumA_order)
+FPR_list <- FPR_compute(truth, sumA_order, J)
+
+roc_eval_moclust <- list(FPR=FPR_list, TPR=TPR_list) 
+ROC_df_moclust <- do.call(rbind, lapply(1:ndat, function (ii){
+  fpr <- roc_eval_moclust$FPR[[ii]]
+  tpr <- roc_eval_moclust$TPR[[ii]]
+  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
+}))
+```
+
+```{r, fig.width=7}
+rocs <- rbind(cbind(ROC_df, method="my_method"), cbind(ROC_df_moclust, method="mocluster"), cbind(ROC_df_nmf, method="intNMF"))
+
+ggplot(rocs, aes(x=fpr, y=tpr, color=method))+geom_line()+scale_x_continuous(limits=c(0,1))+scale_y_continuous(limits=c(0,1))+theme_bw()+facet_wrap(.~data)
+```
+
+
+```{r,AUCS, fig.width=7}
+auc <- function (x, y){
+  round(sum(lintegrate(c(x,1), c(y,1), xint=c(x,1))),2)
+}
+rocs %>% group_by(method, data) %>% summarize(auc=auc(fpr, tpr)) %>% ggplot(aes(x=method,y=data, fill=auc))+geom_tile()+ scale_fill_distiller(palette = "YlGnBu", direction=1, limits=c(0.5,1))
+
+
+```
+
+```{r}
+rocs %>% group_by(data, method) %>% summarize(auc=auc(fpr, tpr))
+```
+
+```{r}
+
+df_ARI <- data.frame(method=c("my_method", "mocluster", "NMF", "SNF"), 
+                     ari=c(adjustedRandIndex(clust, true.clusters), 
+                           adjustedRandIndex(clust_moclust, true.clusters),
+                           adjustedRandIndex(clust_intNMF, true.clusters), 
+                           adjustedRandIndex(clust_snf, true.clusters)))
+
+df_ARI
+
+```
+
+
+## Supervised
+
+```{r,  pintMFopt_supervised}
+p <- iteration[which.min(RSS_data %>% filter(BIC=="BIC.3") %>% select(value) %>% pull %>% round)]
+group <- true.clust
+R_super <- SolveInt(Y=data_t, p=p, max.it=4, group=group, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+```
+
+
+```{r, roc_multiom_super, fig.width=7}
+truth <- lapply(lapply(list(c_1$positive %>% unlist %>% unique, 
+                            c_2$positive%>% unlist %>% unique, 
+                            c_3$positive%>% unlist %>% unique) , stringr::str_remove_all, pattern="gene"), as.numeric)
+
+H_transformed <- R_super$H
+
+H_coef <- lapply(H_transformed, function (hh) apply(abs(hh), 2, sum))
+
+H_sorted <- lapply(H_coef, order,decreasing = TRUE)
+ndat <- length(H_sorted)
+
+TPR_compute <- function(truth, selected_var,nvar=NULL){
+  ndat <- length(truth)
+  denom_tp <- sapply(truth, length)
+  tp <- lapply(1:ndat, function(ii){
+    if(is.null(nvar)){nvar= length(selected_var[[ii]])}
+    ho <- selected_var[[ii]][1:nvar]
+    sapply(1:length(ho), function (tt){
+      t <- 1:tt
+      tpr <- (ho[t] %>% intersect(truth[[ii]]) %>% length)/denom_tp[ii]
+    })
+  })
+  return(tp)
+}
+
+FPR_compute <- function(truth, selected_var, J,nvar=NULL){
+  ndat <- length(truth)
+  denom_tp <- sapply(truth, length)
+  fp <- lapply(1:ndat, function(ii){
+    if(is.null(nvar)){nvar= length(selected_var[[ii]])}
+    ho <- selected_var[[ii]][1:nvar]
+    sapply(1:length(ho), function (tt){
+      t <- 1:tt
+      fpr <- (ho[t]%>% setdiff(truth[[ii]]) %>% length)/(J[ii]-denom_tp[ii])
+    })
+  })
+  return(fp)
+}
+
+TPR_list <- TPR_compute(truth, H_sorted)
+FPR_list <- FPR_compute(truth, H_sorted, J)
+
+
+
+roc_eval <- list(FPR=FPR_list, TPR=TPR_list) 
+ROC_df <- do.call(rbind, lapply(1:ndat, function (ii){
+  fpr <- roc_eval$FPR[[ii]]
+  tpr <- roc_eval$TPR[[ii]]
+  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
+})) %>% mutate(method="my_method_supervised")
+
+ggplot(rbind(ROC_df, rocs), aes(x=fpr, y=tpr, color=method, type=method))+geom_line()+scale_x_continuous(limits=c(0,1))+scale_y_continuous(limits=c(0,1))+theme_bw()+geom_abline(slope=1, intercept=0)+facet_wrap(.~data)
+
+
+
+```
+```{r}
+ROC_df %>% group_by(data) %>% summarize(auc=auc(fpr, tpr)) %>% mutate(method="supervised_pintmf")
+
+rocs %>% group_by(data, method) %>% summarize(auc=auc(fpr, tpr)) %>% filter(method=="my_method")
+```
+
