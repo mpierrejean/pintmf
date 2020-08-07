@@ -35,7 +35,7 @@ this argument allows to adapt modelisation by adding constraints.
 For exemple methylation data takes values between 0 and 1, then H block corresponding to
 methylation data takes values between 0 and 1.}
 
-\item{init_flavor}{flavor to initialize W matrix (hclust, SNF, random, pca or svd)}
+\item{init_flavor}{flavor to initialize W matrix (hclust, SNF, random or svd)}
 
 \item{verbose}{A logical value indicating whether to print extra information.
 Defaults to FALSE}

@@ -32,7 +32,6 @@ We simulate a dataset and we run the methods. We compute the ARI to evaluate the
 library(Matrix)
 library(tidyverse)
 library(PintMF)
-library(CrIMMix)
 library(future)
 library(mclust)
 library(tidyr)
@@ -42,8 +41,6 @@ library(gplots)
 library(gridExtra)
 library(tis)
 library(stringr)
-
-
 ```
 
 # Methods 
@@ -52,7 +49,7 @@ library(stringr)
 
 We simulate 3 blocs with the same number of individuals (50) but various number of variables. The three blocs mimic various types of omics data with 3 types of distribution (Gaussian, Binary and Beta-like).
 
-```{r, simulations}
+```{r, simulations, eval=FALSE}
 set.seed(444)
 nclust <- 4
 nByclust= c(5, 10, 25, 10)
@@ -62,14 +59,21 @@ c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary",
 
 params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
 c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000,flavor="beta", 
-                 params=params_beta, prop=0.1, noise=0.2)
-data <- list(c_1$data, c_2$data, c_3$data)
+                 params=params_beta, prop=0.3, noise=0.1)
+data <- list(c_1$data, 
+             c_2$data, 
+             c_3$data)
+truth <- lapply(lapply(list(c_1$positive %>% unlist %>% unique, 
+               c_2$positive%>% unlist %>% unique, 
+               c_3$positive%>% unlist %>% unique) , stringr::str_remove_all, pattern="gene"), as.numeric)
+
 
 true.clust <- c_1$true.clusters
 print(sapply(data,dim))
 data_names <- c("gaussian", "binary", "beta-like")
 names(data) <- data_names
-
+data_vignette <- list(data=data, clust=true.clust, truth=truth)
+usethis::use_data(data_vignette, internal=FALSE, overwrite = TRUE)
 ```
 
 ## Figures Raw data
@@ -77,7 +81,11 @@ names(data) <- data_names
 Here, we plot the heatmap of each bloc.
 
 ```{r, heatmap, fig.width=10, fig.height=5}
+data("data_vignette")
 
+true.clust <-  data_vignette$clust
+data <- data_vignette$data
+truth <- data_vignette$truth
 cols.clust <- brewer.pal(4, "Set1")[true.clust %>% as.factor] 
 data[[1]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
 data[[2]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColors=cols.clust, scale="none")
@@ -89,6 +97,7 @@ data[[3]] %>%  heatmap.2( dendrogram="both", trace="none",Rowv=TRUE, RowSideColo
 We run PintMF with various number of latent variables.
 
 ```{r run_my_meth, message=FALSE}
+data_names <- c("gaussian", "binary", "beta-like")
 data_t <- data
 data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
 R_p <- future_lapply(2:10, function(p) SolveInt(Y=data_t, p=p, max.it=3, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet"))
@@ -148,13 +157,6 @@ grid.arrange(g_pve, g_loss, ncol=2)
 
 
 
-```{r, run_methods}
-R_moclust <- IntMultiOmics(data_t, method="Mocluster", K=4, k= c(0.4, 0.2, 0.6))
-R_intNMF <- IntMultiOmics(data_t, method="intNMF", K=4)
-R_SNF <- IntMultiOmics(data_t, method="SNF", K=4)
-```
-
-
 # Performance evaluation
 
 In this section we evaluate the performance of the 4 methods. We first compute the ARI to evaluate the ability of each method to recover the right classification
@@ -163,20 +165,12 @@ In this section we evaluate the performance of the 4 methods. We first compute t
 
 ```{r, clustering, fig.width=7.5, fig.height=5}
 clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
-clust_moclust <- R_moclust$clust
-clust_intNMF <- R_intNMF$clust
 
-clust_snf <- R_SNF$clust
-
-true.clusters <- c_1$true.clusters
-cat("my clustering:", adjustedRandIndex(clust, true.clusters), "\n")
-cat("mocluster clustering:", adjustedRandIndex(clust_moclust, true.clusters), "\n")
-cat("intNMF clustering:", adjustedRandIndex(clust_intNMF, true.clusters), "\n")
-cat("SNF clustering:", adjustedRandIndex(clust_snf, true.clusters), "\n")
+cat("my clustering:", adjustedRandIndex(clust, true.clust), "\n")
 cols <- brewer.pal(4, "Set1")
-table(true.clusters, clust)
+table(true.clust, clust)
 pal <- rev(brewer.pal(10, "RdBu"))
-heatmap.2(R$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clusters)],
+heatmap.2(R$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clust)],
                   col = pal)
 ```
 
@@ -187,9 +181,6 @@ Then, we evaluate if the methods are able to find the correct variables in the t
 ### TPR and FPR
 
 ```{r, ROC_eval}
-truth <- lapply(lapply(list(c_1$positive %>% unlist %>% unique, 
-               c_2$positive%>% unlist %>% unique, 
-               c_3$positive%>% unlist %>% unique) , stringr::str_remove_all, pattern="gene"), as.numeric)
 
 est_multiom <- lapply(R$H, function (rr) {
   rr%>% 
@@ -208,21 +199,6 @@ mapply(function(e, t, d, j) (e %>% setdiff(t) %>% length)/(j-d), est_multiom, tr
 ```
 
 
-```{r, roc_eval_moclust}
-a <- R_moclust$fit@loading
-test <- rowSums(abs(a))
-idx <- which(test!=0)
-est_muclust <- test[idx]
-est_muclust <- lapply(1:ndat, function (kk){
-  idx <- grep(sprintf("dat%s", kk), names(est_muclust))
-  regexp <- "[[:digit:]]+"
-  gsub(sprintf("_dat%s", kk), "", names(est_muclust)[idx]) %>%
-    str_extract(pattern=regexp)
-})  
-
-mapply(function(e, t, d) (e %>% intersect(t) %>% length)/d, est_muclust, truth, denom_tp)
-mapply(function(e, t, d, j) (e %>% setdiff(t) %>% length)/(j-d), est_muclust, truth, denom_tp, J)
-```
 
 ### ROC Figures
 
@@ -288,60 +264,8 @@ TPR_compute(truth, H_sorted, 330) %>% sapply( max)
 FPR_compute(truth, H_sorted, J, 330) %>%sapply(max)
 ```
 
-
-```{r, roc_intNMF, fig.width=7}
-H_transformed_nmf <- R_intNMF$fit$H
-H_transformed_nmf[[3]] <- apply(H_transformed_nmf[[3]], 2, function (hh) hh)
-#H_transformed_nmf[[1]] <-  apply(H_transformed_nmf[[1]], 2, function (hh) hh-mean(hh))
-#H_transformed_nmf[[2]] <-  apply(H_transformed_nmf[[2]], 2, function (hh) hh-mean(hh))
-
-H_coef_nmf<- lapply(H_transformed_nmf, function (hh) colSums(abs(hh)))
-
-H_sorted_nmf <- lapply(H_coef_nmf, order,decreasing = TRUE)
-ndat <- length(H_sorted_nmf)
-
-TPR_list <- TPR_compute(truth, H_sorted_nmf)
-FPR_list <- FPR_compute(truth, H_sorted_nmf, J)
-data_names <- c("gaussian", "binary", "beta-like")
-
-roc_eval <- list(FPR=FPR_list, TPR=TPR_list) 
-ROC_df_nmf <- do.call(rbind, lapply(1:ndat, function (ii){
-  fpr <- roc_eval$FPR[[ii]]
-  tpr <- roc_eval$TPR[[ii]]
-  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
-}))
-
-```
-
-
-```{r, roc_mocluster, fig.width=7}
-
-fit <- R_moclust$fit
-a <- fit@loading
-J <- sapply(fit@data, nrow)
-regexp <- "[[:digit:]]+"
-ndat <- length(R_moclust$fit@data )
-
-sumA <- rowSums(abs(a))
-sumA_order <- sort(sumA, decreasing = TRUE) %>% names
-sumA_order <- lapply(1:ndat, function (kk){
-  idx <- grep(sprintf("dat%s", kk), sumA_order)
-  gsub(sprintf("_dat%s", kk), "", sumA_order[idx]) %>% str_extract(pattern=regexp)
-})
-
-TPR_list <- TPR_compute(truth, sumA_order)
-FPR_list <- FPR_compute(truth, sumA_order, J)
-
-roc_eval_moclust <- list(FPR=FPR_list, TPR=TPR_list) 
-ROC_df_moclust <- do.call(rbind, lapply(1:ndat, function (ii){
-  fpr <- roc_eval_moclust$FPR[[ii]]
-  tpr <- roc_eval_moclust$TPR[[ii]]
-  return(data.frame(tpr=tpr,fpr=fpr, data=data_names[ii]))
-}))
-```
-
 ```{r, fig.width=7}
-rocs <- rbind(cbind(ROC_df, method="my_method"), cbind(ROC_df_moclust, method="mocluster"), cbind(ROC_df_nmf, method="intNMF"))
+rocs <- rbind(cbind(ROC_df, method="my_method"))
 
 ggplot(rocs, aes(x=fpr, y=tpr, color=method))+geom_line()+scale_x_continuous(limits=c(0,1))+scale_y_continuous(limits=c(0,1))+theme_bw()+facet_wrap(.~data)
 ```
@@ -362,12 +286,8 @@ rocs %>% group_by(data, method) %>% summarize(auc=auc(fpr, tpr))
 
 ```{r}
 
-df_ARI <- data.frame(method=c("my_method", "mocluster", "NMF", "SNF"), 
-                     ari=c(adjustedRandIndex(clust, true.clusters), 
-                           adjustedRandIndex(clust_moclust, true.clusters),
-                           adjustedRandIndex(clust_intNMF, true.clusters), 
-                           adjustedRandIndex(clust_snf, true.clusters)))
-
+df_ARI <- data.frame(method=c("my_method"), 
+                     ari=c(adjustedRandIndex(clust, true.clust)))
 df_ARI
 
 ```

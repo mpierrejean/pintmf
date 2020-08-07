@@ -2,7 +2,7 @@
 #' @title get.H solve equation for H
 #' @param W  weight matrix
 #' @param y observations
-#' @param flavor_mod This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "oem" (not yet implemented).
+#' @param flavor_mod This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "biglasso"or "ncvreg" or quadrupen
 #' @param verbose A logical value indicating whether to print extra information.
 #'   Defaults to FALSE
 #' @importFrom glmnet glmnet
@@ -26,13 +26,12 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
 
 
   if(flavor_mod=="glmnet"){
-    ## Lasso regression
+    ## Lasso regression with glmnet
     W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = TRUE)
-    #W.tilde <- kronecker(diag(J), W) %>% as.big.matrix()
     y.tilde <- (as.numeric(y))
     cvfit <- try(cv.glmnet(W.tilde, y.tilde,
                            intercept=FALSE,
-                           lambda = seq(from=0.1/J1, to =2/J1, length=20),
+                           lambda = seq(from=0.1/J1, to =100/J1, length=30),
                            nfolds=5))
     if (inherits(cvfit, "try-error")) {
       message("Something wrong occurs, init H to random")
@@ -46,9 +45,8 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
     Z <- round(Z,2)
   }
   if(flavor_mod=="ncvreg"){
-    ## Lasso regression
+    ## Lasso regression ncvreg
     W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix
-    #W.tilde <- kronecker(diag(J), W) %>% as.big.matrix()
     y.tilde <- (as.numeric(y))
     cvfit <- try(cv.ncvreg(W.tilde, y.tilde,
                            intercept=FALSE,
@@ -58,16 +56,15 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
     Z <- round(Z,2)
   }
   if(flavor_mod=="biglasso"){
-    ## Lasso regression
+    ## Lasso regression with biglasso
     W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix%>% as.big.matrix()
-    #W.tilde <- kronecker(diag(J), W) %>% as.big.matrix()
     y.tilde <- (as.numeric(y))
     fit <- cv.biglasso(X = W.tilde, y = y.tilde)
     Z <-  coef(fit)[-1]%>% matrix(nrow = p, ncol = J, byrow = FALSE)
   }
   if(flavor_mod=="quadrupen"){
+    ## Lasso regression with biglasso with quadrupen
     W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix
-    #W.tilde <- kronecker(diag(J), W) %>% as.big.matrix()
     y.tilde <- (as.numeric(y))
     beta.lasso <- slot(crossval(x=W.tilde,y=y.tilde, penalty="elastic.net", mc.cores=2,intercept=FALSE, K = 5) , "beta.min")
     Z <-   beta.lasso%>% matrix(nrow = p, ncol = J, byrow = FALSE)

@@ -15,7 +15,7 @@
 #' @param verbose A logical value indicating whether to print extra information.
 #'   Defaults to FALSE
 #' @param flavor_mod glmnet or (oem not implemented yet)
-#' @param init_flavor flavor to initialize W matrix (hclust, SNF, random, pca or svd)
+#' @param init_flavor flavor to initialize W matrix (hclust, SNF, random or svd)
 #' @param ... other arguments
 #'
 #' @return A list that contains :
@@ -29,7 +29,6 @@
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan
 #' @importFrom nnet class.ind
-#' @importFrom pcaMethods pca
 #' @import stats
 SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep("none", length(Y)), init_flavor="snf", verbose=FALSE,...
 ) {
@@ -89,9 +88,6 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
     idx <- sample(1:nrow(yyt),pp)
     yyt[idx,]
   }
-  initH_pca <- function(yyt, p) {
-    lapply(yyt, function (h) pca(h, nPcs = p)@loadings %>% t)
-  }
   initH_svd <- function(yyt, p) {
     lapply(yyt, function (h) svd(h, nv=p)$v %>% t)
   }
@@ -106,9 +102,6 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
   }
   if(init_flavor=="svd"){
     Hc <- initH_svd(Yt, p )
-  }
-  if(init_flavor=="pca"){
-    Hc <- initH_pca(Yt, p )
   }
   if(init_flavor=="random"){
     Hc <- mapply(initH_random,Yt, rep(p, length(Y)), SIMPLIFY = FALSE)

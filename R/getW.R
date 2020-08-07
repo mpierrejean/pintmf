@@ -17,7 +17,7 @@
 #' We <- get.W(Zbar, Ybar)
 #'
 #' @importFrom glmnet glmnet
-#' @importFrom lsei lsei
+#' @importFrom limSolve lsei
 #' @importFrom dplyr %>%
 #' @export
 get.W <- function(Zbar, Ybar) {
@@ -35,7 +35,7 @@ solvew <- function(ind, Ybar, Zbar){
                       intercept=FALSE))
   if (inherits(fit, "try-error")|sum(fit$beta)==0) {
     message("Something wrong occurs, init W with Lsei")
-    w <- try(lsei(a=Zbar, b=ybar, c=rep(1, p), d=1,lower=0))
+    w <- try(lsei(A=Zbar, B=ybar, E=rep(1, p), F=1))
     if (inherits(w, "try-error")) {
       w <- rep(1/p, p)
     }

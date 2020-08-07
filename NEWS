@@ -1,8 +1,12 @@
 Package: PintMF
 ==============
-Version: 0.1.3-9000 [2020-04-23]
+Version: 0.1.5-9000 [2020-08-05]
+  o Clean up
+  o Modify default grid in lambda
+Version: 0.1.4-9000 [2020-04-23]
   o Clean up and check
   o Add other method to perform H inference
+  o vignettes
   o Now several type of initialization are available
 Version: 0.1.3-9000 [2020-02-13]
   o Clean up and check
