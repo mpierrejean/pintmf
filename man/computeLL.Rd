@@ -11,6 +11,9 @@ computeLL(Y, res)
 
 \item{res}{result from SolveInt function}
 }
+\value{
+a list containing RSS value, p, n and J
+}
 \description{
 computeLL
 }

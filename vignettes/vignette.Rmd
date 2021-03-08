@@ -1,18 +1,15 @@
 ---
-title: PintMF vignette
-author: "Morgane Pierre-Jean"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+title: "PintMF vignette"
+author: Morgane Pierre-Jean
 fig_align: "center"
 fig_width: 15
 fig_height: 10
 vignette: >
   %\VignetteIndexEntry{PintMF vignette}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
 ---
   
-
+  
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
 collapse = TRUE,
@@ -22,7 +19,7 @@ comment = "#>"
 
 # Introduction
 
-This document shows the results obtained with our method (PintMF) compared to 3 others methods: SNF, MoCluster and intNMF.
+This document shows the results obtained with our method (PintMF).
 
 We simulate a dataset and we run the methods. We compute the ARI to evaluate the performance of the clustering but also the ROC curve to evaluate the variable selection.
 
@@ -41,6 +38,7 @@ library(gplots)
 library(gridExtra)
 library(tis)
 library(stringr)
+library(CrIMMix)
 ```
 
 # Methods 
@@ -53,19 +51,16 @@ We simulate 3 blocs with the same number of individuals (50) but various number 
 set.seed(444)
 nclust <- 4
 nByclust= c(5, 10, 25, 10)
-c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.05, noise=1)
-c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary",
-                 params=list(c(p=0.6)), prop=0.1, noise=0.3)
-
-params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
-c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000,flavor="beta", 
-                 params=params_beta, prop=0.3, noise=0.1)
+c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.005, noise=0.2)
+c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary", params=list(c(p=0.6)), prop=0.01, noise=0.1)
+params_beta <- list(c(mean1=-2, mean2=2, sd1=0.5, sd2=0.5))
+c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=5000,flavor="beta", params=params_beta, prop=0.2, noise=0.1)
 data <- list(c_1$data, 
              c_2$data, 
              c_3$data)
 truth <- lapply(lapply(list(c_1$positive %>% unlist %>% unique, 
-               c_2$positive%>% unlist %>% unique, 
-               c_3$positive%>% unlist %>% unique) , stringr::str_remove_all, pattern="gene"), as.numeric)
+                            c_2$positive%>% unlist %>% unique, 
+                            c_3$positive%>% unlist %>% unique) , stringr::str_remove_all, pattern="gene"), as.numeric)
 
 
 true.clust <- c_1$true.clusters
@@ -99,60 +94,59 @@ We run PintMF with various number of latent variables.
 ```{r run_my_meth, message=FALSE}
 data_names <- c("gaussian", "binary", "beta-like")
 data_t <- data
-data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
-R_p <- future_lapply(2:10, function(p) SolveInt(Y=data_t, p=p, max.it=3, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet"))
+data_t[[3]] <- log(data[[3]]/(1-data[[3]]))
+R_p <- future_lapply(2:10, function(p) SolveInt(Y=data_t, p=p, max.it=20, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet"))
 ```
 
 Here we compute the loss and the BIC in order to select the right number of latent variables.
 
-```{r, pve}
-loss <- sapply(R_p, function (rr){
-  W <- rr$W
-  l <- sapply(1:length(rr$H), function (ii) {
-    h <- rr$H[[ii]]
-    y <- data_t[[ii]]
-    sum((y-W%*%h)^2)/(nrow(W))
-  })
-  mean(l)
-})
-pves <- sapply(R_p, function (rr){
-  rr$pve[2]
-})
-loss_W <- sapply(R_p, function (rr){
-  W <- rr$W
-  sum(W^2)/ncol(W)
-})
-```
+### Criterion
 
-```{r}
+```{r, crit_mod_selec}
 iteration <- 2:10
-df_pve <- data.frame(pve=loss_W, iteration=iteration)
-pen <- 2*(sapply(data_t, sd) %>% mean)
-ggplot(df_pve, aes(x=iteration, y=pve+pen*iteration))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)
-```
+pves <- sapply(R_p, function (rr){
+  rr$pve[length(rr$pve)]
+})
+pve_df <- data.frame(pve=pves, iteration=iteration)
 
-```{r, BIC}
-RSS_data_mat <- sapply(R_p, computeLL, Y=data_t)
-RSS_data <-  RSS_data_mat %>% t %>% data.frame
+loss_df <- mapply( function(res) (computeLL(Y=data_t, res=res) ), R_p) %>% t %>% as.data.frame
 
-BIC <- sapply(seq(from=0.1, to =2, length=5), function (pen) apply(RSS_data_mat, 2, compute_BIC, pen = pen)[1,])
-RSS_data <-  RSS_data_mat %>% t %>% data.frame %>% cbind(BIC= BIC) %>% pivot_longer( cols = starts_with("BIC"),names_to = "BIC")
-```
+bics_df <- mapply( function(res) (computeLL(Y=data_t, res=res) %>% compute_BIC(pen=0)), R_p) %>% t %>% as.data.frame
 
-```{r, plot RSS}
-ggplot(data = RSS_data, aes(x = p)) +theme_bw()+geom_line(aes(y = value))+facet_wrap(.~BIC, scale="free")
+coph <- sapply(R_p, function (rr) cor(hclust(dist(rr$W), method="ward.D2") %>% cophenetic, dist(rr$W)))
+coph_df <- data.frame(cophenetic=coph, iteration=2:(length(coph)+1))
+
 
 ```
 
+```{r, plot_mod_selec}
+g_c <- ggplot(coph_df, aes(x=iteration, y=cophenetic))+
+  geom_point()+theme_bw()+geom_line()+
+  scale_x_continuous(breaks=iteration)+xlab("p")
 
-```{r, loss}
-p <- iteration[which.min(RSS_data %>% filter(BIC=="BIC.3") %>% select(value) %>% pull %>% round)]
-R <- SolveInt(Y=data_t, p=p, max.it=4, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
-df_pve <- data.frame(pve=R$pve, iteration=1:length(R$pve))
-g_pve <- ggplot(df_pve, aes(x=iteration, y=pve))+geom_point()+theme_bw()+geom_line()+ylim(c(0, max(df_pve$pve)))
-df_loss <- data.frame(loss=R$loss[-1], iteration=1:length(R$loss[-1]))
-g_loss <- ggplot(df_loss, aes(x=iteration, y=loss))+geom_point()+theme_bw()+geom_line()
-grid.arrange(g_pve, g_loss, ncol=2)
+g_bic <- bics_df %>% ggplot(aes(x=p.p, y=BIC.n)) +
+  geom_point()+theme_bw()+theme_bw()+ theme(legend.position="bottom")+
+  scale_x_continuous(breaks =iteration)+xlab("p")+ylab("BIC")+geom_line()
+
+
+g_loss <- loss_df %>% ggplot(aes(x=p, y=RSS)) +
+  geom_point()+theme_bw()+theme_bw()+ theme(legend.position="bottom")+
+  scale_x_continuous(breaks = iteration)+xlab("p")+ylab("RSS")+geom_line()
+
+g_pve <- ggplot(pve_df, aes(x=iteration,y=pve))+
+  geom_point()+theme_bw()+geom_line()+
+  scale_x_continuous(breaks=iteration)
+g <- gridExtra::grid.arrange(g_bic, g_pve,g_c,g_loss, ncol=2)
+g
+
+```
+
+After looking at the graphics we choose $p=6$ 
+
+
+```{r, eval=TRUE}
+p <- 4
+R <- SolveInt(Y=data_t, p=p, max.it=20, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
 ```
 
 
@@ -164,14 +158,14 @@ In this section we evaluate the performance of the 4 methods. We first compute t
 ## Clustering
 
 ```{r, clustering, fig.width=7.5, fig.height=5}
-clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(4)
+clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(p)
 
 cat("my clustering:", adjustedRandIndex(clust, true.clust), "\n")
 cols <- brewer.pal(4, "Set1")
 table(true.clust, clust)
 pal <- rev(brewer.pal(10, "RdBu"))
 heatmap.2(R$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clust)],
-                  col = pal)
+          col = pal)
 ```
 
 ## Variable selection
@@ -184,7 +178,7 @@ Then, we evaluate if the methods are able to find the correct variables in the t
 
 est_multiom <- lapply(R$H, function (rr) {
   rr%>% 
-    apply(1,FUN=function(x) which(abs(x)>quantile(abs(x), 0.95))) %>% 
+    apply(1,FUN=function(x) which(abs(x)>quantile(abs(x), 0.90))) %>% 
     unlist %>% 
     unique()
 })
@@ -203,12 +197,7 @@ mapply(function(e, t, d, j) (e %>% setdiff(t) %>% length)/(j-d), est_multiom, tr
 ### ROC Figures
 
 ```{r, roc_multiom, fig.width=7}
-H_transformed <- R$H
-H_transformed[[3]] <- apply(H_transformed[[3]], 2, function (hh) hh)
-#H_transformed[[1]] <-  apply(H_transformed[[1]], 2, function (hh) hh-mean(hh))
-#H_transformed[[2]] <-  apply(H_transformed[[2]], 2, function (hh) hh-mean(hh))
-
-H_coef <- lapply(H_transformed, function (hh) apply(abs(hh), 2, sum))
+H_coef <- lapply( R$H, function (hh) apply(hh, 2, sd))
 
 H_sorted <- lapply(H_coef, order,decreasing = TRUE)
 ndat <- length(H_sorted)
@@ -257,40 +246,22 @@ ggplot(ROC_df, aes(x=fpr, y=tpr, color=data, type=data))+geom_line()+scale_x_con
 ```
 
 
-### Top 10
-
-```{r}
-TPR_compute(truth, H_sorted, 330) %>% sapply( max)
-FPR_compute(truth, H_sorted, J, 330) %>%sapply(max)
-```
-
-```{r, fig.width=7}
-rocs <- rbind(cbind(ROC_df, method="my_method"))
-
-ggplot(rocs, aes(x=fpr, y=tpr, color=method))+geom_line()+scale_x_continuous(limits=c(0,1))+scale_y_continuous(limits=c(0,1))+theme_bw()+facet_wrap(.~data)
-```
-
 
 ```{r,AUCS, fig.width=7}
 auc <- function (x, y){
   round(sum(lintegrate(c(x,1), c(y,1), xint=c(x,1))),2)
 }
-rocs %>% group_by(method, data) %>% summarize(auc=auc(fpr, tpr)) %>% ggplot(aes(x=method,y=data, fill=auc))+geom_tile()+ scale_fill_distiller(palette = "YlGnBu", direction=1, limits=c(0.5,1))
-
+ROC_df %>% group_by(data) %>% summarize(auc=auc(fpr, tpr)) 
 
 ```
 
-```{r}
-rocs %>% group_by(data, method) %>% summarize(auc=auc(fpr, tpr))
-```
 
 ```{r}
 
 df_ARI <- data.frame(method=c("my_method"), 
-                     ari=c(adjustedRandIndex(clust, true.clust)))
+                     ari=adjustedRandIndex(clust, true.clust), fmes= FlowSOM::FMeasure(clust, predictedClusters=true.clust %>%as.factor() %>%  as.numeric() , silent = FALSE))
 df_ARI
 
 ```
-
 
 

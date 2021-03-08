@@ -1,0 +1,13 @@
+citHeader("To cite PintMF in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "PIntMF: Penalized Integrative Matrix Factorization Method for Multi-Omics Data",
+  author   = "Morgane Pierre-Jean and Florence Mauger and Jean-Francois Deleuze and Edith Le Floch",
+  journal  = "arXiv",
+  year     = "2021",
+  url      = "https://arxiv.org/abs/2103.03184",
+  textVersion = paste(
+
+  )
+)

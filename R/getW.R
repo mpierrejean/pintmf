@@ -38,6 +38,8 @@ solvew <- function(ind, Ybar, Zbar){
     w <- try(lsei(A=Zbar, B=ybar, E=rep(1, p), F=1))
     if (inherits(w, "try-error")) {
       w <- rep(1/p, p)
+    }else{
+      w <- w$X
     }
   } else{
      if(is.na(sum(as.vector(fit$beta)))){

@@ -1,8 +1,8 @@
 Package: PintMF
 Type: Package
 Title: Penalized Integrative Matrix Factorization for Multiomics Data
-Version: 0.1.5-9000
-Date: 2020-08-05
+Version: 0.1.7-9000
+Date: 2021-02-23
 Authors@R: person("Morgane", "Pierre-Jean", email = "mpierrejean.pro@gmail.com",
                   role = c("aut", "cre"))
 Description: Package to perform Penalized Integrative Matrix Factorization for multiomics data sets.
@@ -10,18 +10,14 @@ Depends: R (>= 3.5.0)
 License: GPL
 LazyData: TRUE
 VignetteBuilder: knitr
-RoxygenNote: 7.0.1
+RoxygenNote: 7.1.1
 Imports:
     Matrix,
-    MASS,
-    survival,
     glmnet,
     dplyr,
     nnet,
-    tidyverse,
     future,
     future.apply,
-    testthat,
     SNFtool,
     limSolve,
     stats,
@@ -42,6 +38,24 @@ Suggests:
     stringr,
     gridExtra,
     tidyr,
-    circlize
+    circlize,
+    ComplexHeatmap,
+    iCluster,
+    survminer,
+    CIMLR,
+    ConsensusClusterPlus,
+    org.Hs.eg.db,
+    PINSPlus,
+    clusterProfiler,
+    usethis,
+    FlowSOM,
+    LRAcluster,
+    CrIMMix,
+    MASS,
+    survival,
+    testthat,
+    tidyverse,
+    GenomicRanges,
+    enrichplot
 
-    
+

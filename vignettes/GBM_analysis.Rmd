@@ -1,0 +1,268 @@
+---
+title: "Glioblastoma Analysis"
+author: Morgane Pierre-Jean
+vignette: >
+  %\VignetteIndexEntry{Glioblastoma vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction.
+This document reproduce the graphics of GBM analysis of the paper untitled : Multi-omics data integration with penalized matrix factorization method.
+
+
+```{r, message=FALSE}
+library(iCluster)
+library(GenomicRanges)
+library(tidyverse)
+library(PintMF)
+library(future)
+library(RColorBrewer)
+```
+
+
+## Genomic data
+
+The dataset `gbm` comes from `iCluster` package.
+
+```{r, genomic_data}
+data(gbm)
+Y <- gbm
+names <- gsub("[.]", "-", rownames(Y[[1]]))
+barcodes <- gsub("-01[ABC]-.*", "", names)
+```
+
+
+
+
+## Modelisation
+
+```{r, model, message =FALSE, eval=FALSE}
+
+R_gbm <- lapply(2:10, function(p) SolveInt(Y=Y, p=p, max.it=10, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet"))
+```
+
+```{r, eval=FALSE}
+do.call(rbind,lapply(1:length(R_gbm), function (r){
+  rr <- R_gbm[[r]]
+  data.frame(pve=rr$pve, it=factor(1:length(rr$pve)), p=factor(r+1))
+  
+} )) %>% ggplot(aes(x=it, y=pve, group=p))+geom_point()+geom_line(aes(col=p))+theme_bw()
+```
+
+```{r, crit, eval=FALSE}
+pves <- sapply(R_gbm, function (rr){
+  rr$pve[length(rr$pve)]
+})
+
+sub_bic <- mapply( function(res, Y) (computeLL(Y=Y, res=res) ), R_gbm, list(Y)) %>%
+  t %>%  as.data.frame()
+
+g_bic <- sub_bic %>% ggplot(aes(x=p, y=RSS)) +geom_point()+ theme(legend.position="bottom")+scale_x_continuous()+theme_bw()+theme_bw()+ theme(legend.position="bottom")+scale_x_continuous(
+  breaks = 1:10)+xlab("p")+ylab("MSE")+geom_line()
+g_bic
+coph <- sapply(R_gbm, function (rr) compute_coph(rr))
+
+
+df_pve <- data.frame(pve=pves, iteration=2:(length(pves)+1))
+g_pve <- ggplot(df_pve, aes(x=iteration, y=pve))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)+xlab("p")
+
+df_coph <- data.frame(cophenetic=coph, iteration=2:(length(coph)+1))
+g_c <- ggplot(df_coph, aes(x=iteration, y=cophenetic))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)+xlab("p")
+
+g <- gridExtra::grid.arrange(g_bic, g_pve,g_c, ncol=3)
+#ggsave("../../Figs/GBM_bics_pve.pdf", g, width =7, height=3.5)
+```
+
+
+
+```{r, select_model}
+best <- 4
+R_gbm_best <- SolveInt(Y=Y, p=best+1, max.it=10, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+
+rownames(R_gbm_best$W) <-  rownames(Y[[1]])
+
+clust <- R_gbm_best$W %>% round(2) %>% dist %>% hclust (method="ward.D2") %>%
+  cutree(k=(best+1))
+clust.df <- data.frame(CLID = gsub("-01[ABC]-.*", "", gsub("[.]", "-", names(clust))),clust=clust)
+data(status_2)
+join_status_clust <- status_2 %>% full_join(clust.df, by=c("CLID"="CLID"))
+join_status_clust <- join_status_clust %>% arrange(CLID) %>% filter(!is.na(clust))%>% mutate(Subtype=ifelse(is.na(Subtype), "NA", Subtype))
+```
+
+## Graphics
+
+```{r}
+library(ComplexHeatmap)
+# Annotation data frame
+annot_df <- data.frame(PIntMF = clust, Types =factor(join_status_clust$Subtype, levels = c("NA", "PN", "MES", "CL", "NL")))
+# Define colors for each levels of qualitative variables
+col.heat <- rev(brewer.pal(9,"RdBu"))
+
+col.clust <- RColorBrewer::brewer.pal(best+1, "Set1")[1:(best+1)]
+clust_col = structure(names = 1:(best+1),col.clust)
+col.true <- RColorBrewer::brewer.pal(5, "Set3")[1:nlevels(annot_df$Types)]
+true_col = structure(names = levels(annot_df$Types),col.true)
+
+col = list(PIntMF = clust_col,
+           Types = true_col)
+# Create the heatmap annotation
+ha <- HeatmapAnnotation(Types =annot_df$Types,
+                        PIntMF = clust,col=col,
+                        show_legend = c(TRUE, FALSE),
+                        annotation_legend_param = list(
+                          Types = list(nrow = 1),
+                          PIntMF = list(nrow = 1)), annotation_name_side = "left")
+
+# Combine the heatmap and the annotation
+rr <- str_remove(str_remove_all(rownames(R_gbm_best$W), "TCGA[.]0[0-9][.]"), "[.].*")
+
+mat <- R_gbm_best$W
+rownames(mat) <- rr
+ht_list <- t(mat) %>% round(3) %>% Heatmap(
+  top_annotation = ha, cluster_rows = FALSE, cluster_columns = FALSE, col=col.heat, column_names_gp = gpar(fontsize = 8), name = "W values", heatmap_legend_param = list(direction = "horizontal"), column_split = clust)
+
+draw(ht_list, merge_legend = FALSE, heatmap_legend_side = "left",
+     annotation_legend_side = "top",)
+
+
+```
+
+```{r, eval=FALSE}
+pdf("../../Figs/heatmap_gbm.eps",width=6, height=5)
+draw(ht_list, merge_legend = FALSE, heatmap_legend_side = "left",
+     annotation_legend_side = "top")
+dev.off()
+```
+
+
+## Survival analysis
+
+### Clinical
+```{r, clinical_data}
+data(status)
+df.sub <- status %>% filter(Patient.ID%in%barcodes)
+```
+
+```{r}
+library(survival)
+
+clust.df <- data.frame(CLID = gsub("-01[ABC]-.*", "", gsub("[.]", "-", names(clust))),
+                       clust=clust)
+
+join_surv_clust <- df.sub %>% left_join(clust.df, by=c("Patient.ID"= "CLID"))
+
+mydata_surv <- data.frame(time= as.numeric(join_surv_clust$Overall.Survival..Months.), status=as.numeric(as.factor(join_surv_clust$Overall.Survival.Status))%%2, clust=join_surv_clust$clust)
+
+surv_obj <- (Surv(time=mydata_surv$time,event=mydata_surv$status))
+fit1 <- survfit(surv_obj ~ clust, data = mydata_surv)
+summary(fit1)
+g <- survminer::ggsurvplot(fit1, data = mydata_surv, pval = TRUE, palette = "Set1",ggtheme = theme_bw(),pval.coord = c(75, 1),xlab='Time (months)')
+g
+#ggsave("../../Figs/survival_gbm.eps", print(g), width=6,height=6)
+```
+
+## Profiles
+```{r, eval=FALSE}
+names(R_gbm_best$H) <- c("copy number", "methylation", "expression")
+sapply(1:3, function (jj){
+  HH <- R_gbm_best$H[[jj]]
+  nn <- names(R_gbm_best$H)[jj]
+  rownames(HH) <-  1:(best+1)
+  heat_map_h <- ComplexHeatmap::Heatmap(HH, cluster_rows = TRUE, col=col.heat, name = sprintf("H %s", nn),  column_names_gp = gpar(fontsize = c(2)),   row_names_gp = gpar(col =col.clust, fontsize = c(15),fontface = "bold"), heatmap_legend_param = list(direction = "horizontal", scale=FALSE)
+  )
+  
+  pdf(sprintf("../../Figs/heatmap_h_%s.pdf",names(gbm)[jj]), width=6, height=5)
+  draw(heat_map_h, merge_legend = FALSE, heatmap_legend_side = "bottom",)
+  dev.off()
+})
+```
+
+
+
+
+
+## Best features
+```{r}
+
+organism = "org.Hs.eg.db"
+library(organism, character.only = TRUE)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+
+library(enrichplot)
+# we use ggplot2 to add x axis labels (ex: ridgeplot)
+library(ggplot2)
+
+features1 <- list()
+for(i in 1:length(R_gbm_best$H)){
+  rr <- R_gbm_best$H[[i]]
+  upper=apply(rr, 1, quantile, prob=0.90)
+  lower=apply(rr, 1, quantile, prob=0.10)
+  features1[[i]] <-sapply(1:nrow(rr), function (ll) which((rr[ll, ]>upper[ll]) |(rr[ll, ]<lower[ll])) %>% names)
+  names( features1[[i]]) <- sprintf("Comp%s", 1:length( features1[[i]]))
+  
+}
+```
+
+```{r, eval=FALSE}
+library(UpSetR)
+library(grid)
+
+pdf(file=sprintf("../../Figs/%s_upset_gbm.pdf", names(Y)[1]), width=6.5, height=3) # or other device
+upset(fromList(features1[[1]]), 6)
+grid::grid.text("Copy number dataset",x = 0.65, y=0.95, gp=gpar(fontsize=10))
+dev.off()
+
+pdf(file=sprintf("../../Figs/%s_upset_gbm.pdf", names(Y)[2]), width=6.5, height=3) # or other device
+upset(fromList(features1[[2]]), 6)
+grid::grid.text("Methylation dataset",x = 0.65, y=0.95, gp=gpar(fontsize=10))
+
+dev.off()
+pdf(file=sprintf("../../Figs/%s_upset_gbm.pdf", names(Y)[3]), width=6.5, height=3) # or other device
+upset(fromList(features1[[3]]), 6)
+grid::grid.text("Expression dataset",x = 0.65, y=0.95, gp=gpar(fontsize=10))
+
+dev.off()
+
+```
+
+```{r, pathways, eval=FALSE}
+cols <- c("SYMBOL", "ENTREZID")
+all_hsa <- sapply(1:(best+1),function(pp) {
+  gene_list_ensembl <- AnnotationDbi::select(org.Hs.eg.db, keys=c(features1[[1]][[pp]], features1[[2]][[pp]], features1[[3]][[pp]]) %>% unique, columns=cols, keytype="SYMBOL")
+  bkgd.genes <- AnnotationDbi::select(org.Hs.eg.db, keys=sapply(R_gbm_best$H, colnames) %>% unlist %>% unique , columns=cols, keytype="SYMBOL")
+  egobp <- clusterProfiler::enrichKEGG(
+    gene     = gene_list_ensembl$ENTREZID,
+    organism = "hsa",
+    keyType = "kegg",
+    pvalueCutoff = 0.05,
+    pAdjustMethod = "BH",
+    minGSSize = 10,
+    maxGSSize = 500,
+    qvalueCutoff = 0.2,
+    use_internal_data = FALSE)
+  egobp%>% as.data.frame()
+})
+
+```
+```{r, save, eval=FALSE}
+library("UpSetR")
+desc_list <- all_hsa[2,]
+names(desc_list) <- sprintf("Comp%s", 1:length(desc_list))
+pdf(file=sprintf("../../Figs/upset_enrichment_GBM.pdf"), width=6.5, height=3) # or other device
+upset(fromList(desc_list), 6)
+dev.off()
+```
+
+```{r, eval=FALSE}
+desc_list <- all_hsa[2,]
+p_val <- all_hsa[5,]
+do.call(rbind, lapply(1:length(p_val), function (ii){
+  data.frame(Description=desc_list[[ii]], p_value=p_val[[ii]], Comp=ii)
+})) %>% xtable::xtable()
+```

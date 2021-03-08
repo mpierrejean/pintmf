@@ -1,14 +1,14 @@
 ---
-title: "BXD data"
+title: "BXD Analysis"
 author: Morgane Pierre-Jean
-output: github_document
+output: html_vignette
 vignette: >
-  %\VignetteIndexEntry{BXD data}
+  %\VignetteIndexEntry{BXD vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[UTF-8]{inputenc}
 ---
-
-```{r setup, include=FALSE}
+  
+ ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(Matrix)
 library(tidyverse)
 library(PintMF)
+library(dplyr)
 library(ggplot2)
 library(gridExtra)
 library(ComplexHeatmap)
@@ -43,68 +44,56 @@ true.clust.bxd <- rep(c("CD", "HFD"), times=c(33, 31))
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 library(future)
 R_bxd <- lapply(2:5, function(p) SolveInt(Y=bxd_filtered, p=p,
-                                                  max.it=1,
-                                                  verbose=TRUE,
-                                                  init_flavor="snf",
-                                                  flavor_mod="glmnet"))
+                                          max.it=1,
+                                          verbose=TRUE,
+                                          init_flavor="snf",
+                                          flavor_mod="glmnet"))
 
 
-RSS_data_mat <- sapply(R_bxd, computeLL, Y=bxd_filtered)
-RSS_data <-  RSS_data_mat %>% t %>% data.frame
-ggplot(data = RSS_data, aes(x = p, y = RSS)) + geom_point()
 ```
 
 
-```{r}
-
-BIC <- sapply(seq(from=0.1, to =2, length=10), function (pen) apply(RSS_data_mat, 2, compute_BIC, pen = pen)[1,])
-RSS_data <-  RSS_data_mat %>% t %>% data.frame %>% cbind(BIC= BIC) %>% pivot_longer( cols = starts_with("BIC"), names_to = "BIC")
-
-a            <- range(RSS_data[["RSS"]])
-b            <- range(RSS_data[["value"]])
-scale_factor <- diff(a)/diff(b)
-RSS_data[["value"]]      <- ((RSS_data[["value"]]   - b[1]) * scale_factor) + a[1]
-trans <- ~ ((. - a[1]) / scale_factor) + b[1]
-
-ggplot(data = RSS_data, aes(x = p)) +theme_bw()+geom_line(aes(y = value))+geom_line(aes(y = RSS), col="red")+facet_wrap(.~BIC, scale="free")
-```
-
-```{r}
-loss <- sapply(R_bxd, function (rr){
-  W <- rr$W
-  l <- sapply(1:length(rr$H), function (ii) {
-    h <- rr$H[[ii]]
-    y <- bxd_filtered[[ii]]
-    sum((y-W%*%h)^2)/(nrow(W)*nrow(y))
-  })
-  mean(l)
+```{r, eval=FALSE}
+pves <- sapply(R_bxd, function (rr){
+  rr$pve[length(rr$pve)]
 })
-loss_W <- sapply(R_bxd, function (rr){
-  W <- rr$W
-  sum(W^2)/ncol(W)
-})
+df_pve <- data.frame(pve=pves, iteration=2:(length(R_bxd)+1))
 
-iteration <- 2:5
-df_pve <- data.frame(lossW=loss_W, iteration=iteration, loss= loss, pve= sapply(R_bxd, function (r) r$pve))
-pen <- 2*(sapply(bxd_filtered, sd) %>% mean)
-g1 <- ggplot(df_pve, aes(x=iteration, y=loss))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)
-g2 <- ggplot(df_pve, aes(x=iteration, y=lossW))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)
-g3 <- ggplot(df_pve, aes(x=iteration, y=pve))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)+ylim(c(80,100))
 
-grid.arrange(g1,g2,g3)
+
+df_bics <- mapply( function(res, Y) (computeLL(Y=bxd_filtered, res=res)), R_bxd, list(bxd_filtered)) %>% t %>% as.data.frame
+
+coph <- sapply(R_bxd, function (rr) cor(hclust(dist(rr$W), method="ward.D2") %>% cophenetic, dist(rr$W)))
+df_coph <- data.frame(cophenetic=coph, iteration=2:(length(coph)+1))
 
 ```
 
+
+```{r, eval=FALSE}
+g_c <- ggplot(df_coph, aes(x=iteration, y=cophenetic))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:10)+xlab("p")
+
+
+g_bic <- df_bics %>% ggplot(aes(x=p, y=RSS)) +geom_point()+ theme(legend.position="bottom")+scale_x_continuous()+theme_bw()+theme_bw()+ theme(legend.position="bottom")+scale_x_continuous(
+  breaks = 1:8)+xlab("p")+ylab("MSE")+geom_line()
+g_bic
+
+
+g_pve <- ggplot(df_pve, aes(x=iteration, y=pve))+geom_point()+theme_bw()+geom_line()+scale_x_continuous(breaks=1:8)+xlab("p")
+
+g <- gridExtra::grid.arrange(g_bic, g_pve,g_c, ncol=3)
+g
+#ggsave("../../Figs/BXD_bics_pve.pdf", g, width =7, height=3.5)
+```
 
 ```{r}
 my_meth <- SolveInt(Y=bxd_filtered, p=2, max.it=5,verbose=TRUE,init_flavor="snf",flavor_mod="glmnet")
 ```
 
 
-```{r}
+```{r, fig.height=10, fig.width=10}
 library(RColorBrewer)
 library(gplots)
 cols <- brewer.pal(4, "Set2")
@@ -113,7 +102,7 @@ table(true.clust.bxd, clust)
 
 pal <- rev(brewer.pal(5, "RdBu"))
 heatmap.2(my_meth$W, scale="none", trace="none",RowSideColors = cols[as.factor(true.clust.bxd)],
-                  col = pal)
+          col = pal)
 ```
 
 
@@ -130,8 +119,6 @@ J <- sapply(data, ncol)
 ```
 
 
-## ROC Figures
-
 ```{r, roc_multiom, fig.width=7}
 cluster <- apply(my_meth$W, 1, which.max)
 H_transformed <- my_meth$H
@@ -140,9 +127,10 @@ H_coef <- lapply(H_transformed, function (hh) {
   names(s) <- colnames(hh)
   s
 })
+H_coef <- lapply(H_transformed, function(hh) apply((hh), 2, sd))
 
 H_sorted <- lapply(H_coef, sort,decreasing = TRUE) %>% lapply(names) %>% lapply(unique)
-
+ht1 <- Heatmap(t(H_transformed[[2]]))
 ```
 
 ```{r, eval=TRUE}
@@ -151,29 +139,80 @@ col.clust <- brewer.pal(7, "Set2")[c(4,5)]
 clust_col = structure(names = c("1", "2"),col.clust)
 col.true <- brewer.pal(6, "Set3")[c(5,6)]
 true_col = structure(names = c("CD", "HFD"),col.true)
-for( i in 1:length(bxd_filtered)){
-  mat <- bxd_filtered[[i]][, H_sorted[[i]][1:10]] %>% t
-  f2 = colorRamp2(seq(min(mat), max(mat), length = 3), c("blue", "#EEEEEE", "red"),
-                            space = "RGB")
-  ha = HeatmapAnnotation(PintMF = clust,
-                         Truth = true.clust.bxd,
-                         col = list( PintMF=clust_col, Truth=true_col),
-                         show_annotation_name = FALSE
-  )
-  ht <- Heatmap(mat,col = f2,
-                show_row_dend = FALSE,
-                show_column_dend = FALSE,
-                cluster_columns=FALSE,
-                row_names_gp = gpar(fontsize =10),
-                column_names_gp = gpar(col=rep(col.true,c(33,31)), fontsize =7),
-                show_column_names = FALSE,
-                top_annotation = ha,
-                name = names(bxd_filtered)[i])
-  #pdf(sprintf("../../../papers/NAR-LaTeX-20170208/PintMF_heatmap_%s.pdf", names(bxd_filtered)[i]), width = 8, height = 8)
-  draw(ht,
-       annotation_legend_side = "left", heatmap_legend_side = "left")
-#dev.off()
+mat1 <- bxd_filtered[[1]][, H_sorted[[1]][1:10]] %>% t
+f21 = colorRamp2(seq(min(mat1), max(mat1), length = 3), c("blue", "#EEEEEE", "red"),
+                 space = "RGB")
+mat2 <- bxd_filtered[[2]][, H_sorted[[2]][1:10]] %>% t
+f22 = colorRamp2(seq(min(mat2), max(mat2), length = 3), c("blue", "#EEEEEE", "red"),
+                 space = "RGB")
+mat3 <- bxd_filtered[[3]][, H_sorted[[3]][1:10]] %>% t
+f23 = colorRamp2(seq(min(mat3), max(mat3), length = 3), c("blue", "#EEEEEE", "red"),
+                 space = "RGB")
 
-}
+ha = HeatmapAnnotation(PintMF = clust,
+                       Truth = true.clust.bxd,
+                       col = list( PintMF=clust_col, Truth=true_col),
+                       show_annotation_name = FALSE
+)
+
+
+ht1 <- Heatmap(t(mat1),col = f21,column_title = "Metabolites",
+               name="Metabolites",
+               show_row_dend = FALSE,
+               show_column_dend = FALSE,
+               cluster_rows=FALSE,
+               column_names_gp = gpar(fontsize =10),
+               row_names_gp = gpar(col=rep(col.true,c(33,31)), fontsize =7),
+               show_row_names = FALSE,heatmap_legend_param = list(direction = "horizontal"))
+rownames(mat2) <- rownames(mat2) %>% stringr::str_remove(pattern=".*;")
+ht2 <- Heatmap(t(mat2),col = f22,name="Proteins",,column_title = "Proteins",
+               show_row_dend = FALSE,
+               show_column_dend = FALSE,
+               cluster_columns=FALSE,
+               column_names_gp = gpar(fontsize =8),
+               row_names_gp = gpar(col=rep(col.true,c(33,31)), fontsize =7),
+               show_row_names = ,heatmap_legend_param = list(direction = "horizontal")
+)
+ht3 <- Heatmap(t(mat3), col = f23,name="RNA",column_title = "RNA",
+               show_row_dend = FALSE,
+               show_column_dend = FALSE,
+               cluster_rows=FALSE,
+               column_names_gp = gpar(fontsize =8),
+               row_names_gp = gpar(col=rep(col.true,c(33,31)), fontsize =7),
+               show_row_names = FALSE,heatmap_legend_param = list(direction = "horizontal"))
+hc = Heatmap(clust,name="PIntMF", col = clust_col,heatmap_legend_param = list(direction = "horizontal"))
+hc2 = Heatmap(true.clust.bxd,name="Truth", col = true_col,heatmap_legend_param = list(direction = "horizontal"))
+ht_list <- ht1+ht2+ht3+hc+hc2
+
+```
+
+```{r, fig.height=10, fig.width=10}
+draw(ht_list, merge_legend = TRUE, heatmap_legend_side = "bottom", 
+     annotation_legend_side = "bottom")
+```
+
+```{r, eval=FALSE, include=FALSE}
+pdf(sprintf("../../Figs/PintMF_heatmap_all.pdf"), width = 6, height = 3)
+draw(ht_list, merge_legend = TRUE, heatmap_legend_side = "top", 
+     annotation_legend_side = "top")
+dev.off()
+
+
+pdf(sprintf("../../Figs/PintMF_heatmap_%s.pdf", names(bxd_filtered)[1]), width = 6, height = 6)
+
+draw(ht1, merge_legend = TRUE, heatmap_legend_side = "bottom", 
+     annotation_legend_side = "bottom")
+dev.off()
+pdf(sprintf("../../Figs/PintMF_heatmap_%s.pdf", names(bxd_filtered)[2]), width = 6, height = 6)
+
+draw(ht2, merge_legend = TRUE, heatmap_legend_side = "bottom", 
+     annotation_legend_side = "bottom")
+dev.off()
+pdf(sprintf("../../Figs/PintMF_heatmap_%s.pdf", names(bxd_filtered)[3]), width = 6, height = 6)
+
+draw(ht3, merge_legend = TRUE, heatmap_legend_side = "bottom", 
+     annotation_legend_side = "bottom")
+dev.off()
+
 ```
 

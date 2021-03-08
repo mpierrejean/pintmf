@@ -14,8 +14,8 @@
 #' @importFrom dplyr %>%
 #' @importFrom biglasso cv.biglasso
 #' @importFrom methods slot
-#' @importFrom quadrupen crossval
 #' @importFrom bigmemory as.big.matrix
+#' @importFrom quadrupen crossval
 #' @export
 get.H <- function(W, y, flavor_mod="glmnet", verbose) {
   J <- ncol(y)
@@ -41,6 +41,12 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
     } else{
       Z <- as.matrix(coef(cvfit)[-1,]) %>% matrix(nrow = p, ncol = J, byrow = FALSE)
       if(verbose) message(sprintf("number of non zero is %s on %s",sum(Z!=0), ncol(Z)*nrow(Z)))
+      if(sum(Z==0)==ncol(Z)*nrow(Z)){
+        #catch non zero coef
+        if(verbose) message(sprintf("catch first non zero coef"))
+        id <- min(which(cvfit$nzero!=0))
+        Z <- (cvfit$glmnet.fit$beta)[,id] %>% as.matrix() %>% matrix(nrow = p, ncol = J, byrow = FALSE)
+      }
     }
     Z <- round(Z,2)
   }
@@ -63,10 +69,10 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
     Z <-  coef(fit)[-1]%>% matrix(nrow = p, ncol = J, byrow = FALSE)
   }
   if(flavor_mod=="quadrupen"){
-    ## Lasso regression with biglasso with quadrupen
+    ## Lasso regression  with quadrupen
     W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix
     y.tilde <- (as.numeric(y))
-    beta.lasso <- slot(crossval(x=W.tilde,y=y.tilde, penalty="elastic.net", mc.cores=2,intercept=FALSE, K = 5) , "beta.min")
+    beta.lasso <- slot(crossval(x=W.tilde,y=y.tilde, penalty="lasso", mc.cores=2,intercept=FALSE, K = 5) , "beta.min")
     Z <-   beta.lasso%>% matrix(nrow = p, ncol = J, byrow = FALSE)
   }
   return(Z)

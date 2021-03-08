@@ -1,5 +1,13 @@
 Package: PintMF
 ==============
+Version: 0.1.7-9000 [2021-02-23]
+  o Clean up
+  o Perparation for submission
+  o Correct bugs in vignettes
+Version: 0.1.6-9000 [2021-01-11]
+  o Clean up
+  o Perparation for submission
+  o Remove BIC calculation (replace by MSE)
 Version: 0.1.5-9000 [2020-08-05]
   o Clean up
   o Modify default grid in lambda

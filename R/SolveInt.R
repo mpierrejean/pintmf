@@ -26,7 +26,7 @@
 #' @export
 #' @importFrom glmnet glmnet
 #' @importFrom dplyr bind_cols
-#' @importFrom future.apply future_lapply
+#' @importFrom future.apply future_sapply
 #' @importFrom future plan
 #' @importFrom nnet class.ind
 #' @import stats
@@ -114,7 +114,6 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
   while (it <= max.it) {
     if(verbose) message("Solve W\n")
     if(is.null(group)){
-
       if(it==1 & init_flavor=="snf"){
 
         Wc <- class.ind(init_SNF(Yt, K=p)$clust)
@@ -145,14 +144,15 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
 
     loss[it ] <- Wc %>% dist %>% hclust(method="ward.D2") %>% cutree(p) %>%
       mclust::adjustedRandIndex(W.old %>% dist %>% hclust(method="ward.D2") %>% cutree(p))
-    if(verbose) message(sprintf("Loss equal to %s", loss[it]))
+    if(verbose) message(sprintf("ARI equal to %s", loss[it]))
     if(loss[it] >0.1){
+      if(it>1& loss[it]>0.99){
+        message(sprintf("W converged stop here"))
+        it <- max.it+1
+      }
       if(verbose) message ("Solve Hc\n")
-      Hc <- future_lapply(1:length(Yt), function(yy){
-        if(verbose){
-          message(sprintf("Solve data number %s:",yy))
-        }
-        get.H(y = Yt[[yy]], W = Wc, flavor_mod=flavor_mod, verbose)}
+      Hc <- future.apply::future_sapply(Yt,FUN=
+        get.H, W = Wc, flavor_mod=flavor_mod, verbose=verbose, USE.NAMES=FALSE,future.seed = 0xBEEF
       )
 
       pve[it] <- PVE(Yt, Hc, Wc)

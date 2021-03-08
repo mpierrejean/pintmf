@@ -5,22 +5,6 @@ library(dplyr)
 source("inst/Simulations_OMICSSMILA/00.setup.R")
 
 
-ComputepAUC <- function(roc) {
-  TPR <- roc$TPR
-  FPR <- roc$FPR
-  aucs <- sapply(1:length(FPR), function (ii){
-    x <- FPR[[ii]]
-    y <- TPR[[ii]]
-    y[is.infinite(y)] <- NaN
-    auc <- sum(tis::lintegrate(c(x,1), c(y,1), xint=c(x,1)))
-    denom <- sum(tis::lintegrate(c(0, 0, max(x)), c(0, 1, 1), xint=c(0, 0, max(x))))
-    res <- auc
-    res
-  })
-  names(aucs) <- c("dataset 1", "dataset 2")
-  aucs
-}
-
 
 TPR_compute <- function(truth, selected_var,nvar=NULL){
   ndat <- length(truth)
@@ -50,7 +34,7 @@ FPR_compute <- function(truth, selected_var, J,nvar=NULL){
   return(fp)
 }
 
-for(ii in 5:n_batch){
+for(ii in 1:n_batch){
   pathMeth_sub <- "inst/extdata/"
   data <- file[[ii]][1:3]
   remove_zero <- function (dat){
@@ -69,8 +53,6 @@ for(ii in 5:n_batch){
   print("my_meth")
 
   my_meth_results_2 <- data_filter_t %>% SolveInt(p=2, max.it=5, flavor_mod = "glmnet", init_flavor = "snf")
-#  my_meth_results_2 <- data_filter_t[c(1,3)] %>% SolveInt(p=2, max.it=5, flavor_mod = "glmnet", init_flavor = "snf")
-
   H_coef <- lapply(my_meth_results_2$H, function(hh) apply(hh, 2, diff) %>% abs)
   H_sorted <- lapply(H_coef, function(h) sort(h,decreasing = TRUE) %>% names)
   t_meth <- file[[ii]]$methpos %>% intersect( colnames(data_filter_t[["meth"]]))

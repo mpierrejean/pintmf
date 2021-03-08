@@ -1,7 +1,6 @@
 ---
 title: "Influence of the initialization"
 author: Morgane Pierre-Jean
-output: github_document
 vignette: >
   %\VignetteIndexEntry{Influence of the initialization}
   %\VignetteEngine{knitr::rmarkdown}
@@ -48,8 +47,10 @@ clust_function <- function(R, nclust){
 }
 ```
 
-```{r, run_init}
+```{r, run_init, eval=FALSE}
+set.seed(55)
 perf <- do.call(rbind, lapply(1:10, function (ii){
+  print(ii)
   c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=100, prop=0.05, noise=0.2)
   c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=50, flavor="binary",
                    params=list(c(p=0.6)), prop=0.1, noise=0.3)
@@ -65,11 +66,11 @@ perf <- do.call(rbind, lapply(1:10, function (ii){
   data_t <- data
   data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
   
-  R_snf <- SolveInt(Y=data_t, p=4, max.it=10, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+  R_snf <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
   
-  R_svd <- SolveInt(Y=data_t, p=4, max.it=10, verbose=FALSE, init_flavor="svd", flavor_mod="glmnet")
-  R_random <- SolveInt(Y=data_t, p=4, max.it=10, verbose=FALSE, init_flavor="random", flavor_mod="glmnet")
-  R_hclust <- SolveInt(Y=data_t, p=4, max.it=10, verbose=FALSE, init_flavor="hclust", flavor_mod="glmnet")
+  R_svd <- SolveInt(Y=data_t, p=4, max.it=5, verbose=TRUE, init_flavor="svd", flavor_mod="glmnet")
+  R_random <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="random", flavor_mod="glmnet")
+  R_hclust <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="hclust", flavor_mod="glmnet")
   df_ari <- data.frame(sim=ii,ARI=c(adjustedRandIndex(clust_function(R_snf, nclust), true.clust), 
                                     adjustedRandIndex(clust_function(R_svd, nclust), true.clust),
                                     adjustedRandIndex(clust_function(R_random, nclust), true.clust),
@@ -89,63 +90,29 @@ perf <- do.call(rbind, lapply(1:10, function (ii){
 
 ## Performance evaluation
 
-```{r, violin_plot}
+```{r, violin_plot, eval=FALSE}
 ARI_dat <-  do.call(rbind, perf[1:10])
-g <- ARI_dat %>% ggplot(aes(x=method, fill=method, y=ARI))+geom_violin()+theme_bw()+theme(legend.position = "none")+xlab("")+geom_point(alpha=0.5)
-#ggsave(filename = '../../../papers/NAR-LaTeX-20170208/eval_init.png', plot = g, width=7, height=5)
+g <- ARI_dat %>% ggplot(aes(x=method, fill=method, y=ARI))+geom_violin()+theme_bw()+theme(legend.position = "none", axis.text.x = element_text(size=15), axis.title.y = element_text(size=15), axis.text.y = element_text(size=10))+xlab("")+geom_point(alpha=0.5)
+ggsave(filename = '../../Figs/eval_init.pdf', plot = g, width=7, height=5)
 g
 ```
 
 
 ## Number of iterations
 
-```{r, pve_plot}
+```{r, pve_plot, eval=FALSE}
 pve_dat <- do.call(rbind, lapply(perf[11:20], function(g){
   g <- g %>% group_by(method) %>% mutate(it = row_number())
 } ))
 
 g_pve <- pve_dat%>% 
   ggplot(aes(x=it, y=PVE,fill=method)) +
-  geom_smooth(se = TRUE, aes(colour=method))+theme_bw()+ theme(legend.position="bottom")+scale_x_continuous(
-    breaks = 1:10)
+  geom_smooth(se = TRUE, aes(colour=method))+theme_bw()+ theme(legend.position="right", axis.text.x = element_text(size=15),axis.title.y = element_text(size=15))+scale_x_continuous(
+    breaks = 1:10)+xlab('iteration')
 g_pve
-#ggsave(filename = '../../../papers/NAR-LaTeX-20170208/pve_init.png', plot = g_pve, width=7, height=5)
+ggsave(filename = '../../Figs/pve_init.pdf', plot = g_pve, width=7, height=5)
 
 ```
 
 
-### Model selection 
-
-```{r, BIC, message=FALSE, warning=FALSE}
-bics <- do.call(rbind, lapply(1:10, function(ii) {
-  penalty <- lapply(2:7, function(p) {
-    c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=100, prop=0.05, noise=0.2)
-    c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=50, flavor="binary", params=list(c(p=0.6)), prop=0.1, noise=0.3)
-    params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
-    c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500,flavor="beta", params=params_beta, prop=0.2, noise=0.2)
-    data <- list(c_1$data, c_2$data, c_3$data)
-    data_names <- c("gaussian", "binary", "beta-like")
-    names(data) <- data_names
-    data_t <- data
-    data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
-    R <- SolveInt(Y=data_t, p=p, max.it=10, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
-    list(res=R, Y=data_t)
-  })
-  t <- sapply(penalty, function(pena) (computeLL(Y=pena$Y, res=pena$res) %>% compute_BIC()))
-  t(t) %>% as.data.frame %>% mutate(sample=ii)
-}))
-```
-
-
-
-```{r, bic_plot}
-g_bic <- bics %>% ggplot(aes(x=p.p, y=BIC.n)) +
-  geom_smooth(se = TRUE)+theme_bw()+ theme(legend.position="bottom")+scale_x_continuous(
-    breaks = 1:10)
-
-g_bic
-#ggsave(filename = '../../../papers/NAR-LaTeX-20170208/bic_p.png', plot = g_bic, width=7, height=5)
-
-
-```
 
