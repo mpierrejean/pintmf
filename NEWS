@@ -1,5 +1,8 @@
 Package: PintMF
 ==============
+Version: 0.1.8-9000 [2021-08-12]
+  o Revised version
+  o Added vignettes to compare without sparsity
 Version: 0.1.7-9000 [2021-02-23]
   o Clean up
   o Perparation for submission

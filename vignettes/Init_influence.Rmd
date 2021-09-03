@@ -11,13 +11,13 @@ vignette: >
   knitr::opts_chunk$set(echo = TRUE)
 ```
 
-In this document, we evaluate the performanc of the various types of initialization.
+In this document, we evaluate the performance of the various types of initialization.
   - Hclust
   - Random
   - SNF
   - SVD
   
-To perform the evaluation, we simulate 10 datasets, then we compote the ARI and the percentage of the variance explained.
+To perform the evaluation, we simulate 10 datasets, then we compute the ARI and the percentage of the variance explained.
 
 
 ## Useful packages

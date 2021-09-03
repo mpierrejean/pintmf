@@ -1,8 +1,8 @@
 Package: PintMF
 Type: Package
 Title: Penalized Integrative Matrix Factorization for Multiomics Data
-Version: 0.1.7-9000
-Date: 2021-02-23
+Version: 0.1.8-9000
+Date: 2021-08-12
 Authors@R: person("Morgane", "Pierre-Jean", email = "mpierrejean.pro@gmail.com",
                   role = c("aut", "cre"))
 Description: Package to perform Penalized Integrative Matrix Factorization for multiomics data sets.
@@ -24,8 +24,7 @@ Imports:
     ncvreg,
     biglasso,
     bigmemory,
-    methods,
-    quadrupen
+    methods
 Suggests:
     cluster,
     gplots,
@@ -56,6 +55,7 @@ Suggests:
     testthat,
     tidyverse,
     GenomicRanges,
-    enrichplot
+    enrichplot,
+    rmarkdown
 
 

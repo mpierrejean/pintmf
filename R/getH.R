@@ -2,7 +2,7 @@
 #' @title get.H solve equation for H
 #' @param W  weight matrix
 #' @param y observations
-#' @param flavor_mod This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "biglasso"or "ncvreg" or quadrupen
+#' @param flavor_mod This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "biglasso"or "ncvreg" or quadrupen or no_sparse
 #' @param verbose A logical value indicating whether to print extra information.
 #'   Defaults to FALSE
 #' @importFrom glmnet glmnet
@@ -15,7 +15,6 @@
 #' @importFrom biglasso cv.biglasso
 #' @importFrom methods slot
 #' @importFrom bigmemory as.big.matrix
-#' @importFrom quadrupen crossval
 #' @export
 get.H <- function(W, y, flavor_mod="glmnet", verbose) {
   J <- ncol(y)
@@ -73,6 +72,17 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
     W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix
     y.tilde <- (as.numeric(y))
     beta.lasso <- slot(crossval(x=W.tilde,y=y.tilde, penalty="lasso", mc.cores=2,intercept=FALSE, K = 5) , "beta.min")
+    Z <-   beta.lasso%>% matrix(nrow = p, ncol = J, byrow = FALSE)
+  }
+
+  if(flavor_mod=="no_sparse"){
+    ## Lasso regression  with lm
+    W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix
+    y.tilde <- (as.numeric(y))
+    lm <- glmnet(W.tilde, y.tilde,
+                 intercept=FALSE,lambda = 0, thresh = 1e-14)
+  beta.lasso <- coef(lm)[-1]
+
     Z <-   beta.lasso%>% matrix(nrow = p, ncol = J, byrow = FALSE)
   }
   return(Z)

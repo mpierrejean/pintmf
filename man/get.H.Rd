@@ -11,7 +11,7 @@ get.H(W, y, flavor_mod = "glmnet", verbose)
 
 \item{y}{observations}
 
-\item{flavor_mod}{This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "biglasso"or "ncvreg" or quadrupen}
+\item{flavor_mod}{This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "biglasso"or "ncvreg" or quadrupen or no_sparse}
 
 \item{verbose}{A logical value indicating whether to print extra information.
 Defaults to FALSE}
