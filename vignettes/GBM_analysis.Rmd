@@ -187,7 +187,7 @@ sapply(1:3, function (jj){
 
 
 ## Best features
-```{r}
+```{r,eval=FALSE}
 
 organism = "org.Hs.eg.db"
 library(organism, character.only = TRUE)

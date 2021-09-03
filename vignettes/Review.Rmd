@@ -1,0 +1,137 @@
+---
+title: "Review"
+author: "Morgane Pierre-Jean"
+date: "11/08/2021"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Review}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
+```
+
+To perform the evaluation, we simulate 20 datasets, then we compute the ARI and the percentage of the variance explained.
+
+
+## Useful packages
+
+```{r, library}
+library(Matrix)
+library(tidyverse)
+library(PintMF)
+library(CrIMMix)
+library(future)
+library(mclust)
+```
+
+## Simulate data with CrIMMix package
+
+Four un balanced groups are simulated.
+
+```{r, simulations}
+nclust <- 4
+nByclust= c(5, 10, 25, 10)
+```
+
+
+```{r, clust_func, message=FALSE}
+clust_function <- function(R, nclust){
+  clust <- R$W %>% dist %>% hclust(method="ward.D2") %>% cutree(nclust)
+}
+```
+
+```{r, run_init, eval=TRUE}
+set.seed(55)
+perf <- do.call(rbind, lapply(1:20, function (ii){
+  print(ii)
+  c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.02, noise=0.2)
+  c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary",
+                   params=list(c(p=0.3)), prop=0.1, noise=0.3)
+  
+  params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
+  
+  c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500,flavor="beta", 
+                   params=params_beta, prop=0.2, noise=0.2)
+  data <- list(c_1$data, c_2$data, c_3$data)
+  true.clust <- c_1$true.clusters
+  data_names <- c("gaussian", "binary", "beta-like")
+  names(data) <- data_names
+  data_t <- data
+  data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
+  
+  R_snf <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+  
+  R_no_sparse <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="snf", flavor_mod="no_sparse")
+  
+  df_ari <- data.frame(sim=ii,ARI=c(adjustedRandIndex(clust_function(R_snf, nclust), true.clust), 
+                                    adjustedRandIndex(clust_function(R_no_sparse, nclust), true.clust)),
+                       method=c("Sparse", "No_sparse"))
+  
+  df_pve <- data.frame( 
+    PVE=c(R_snf$pve, R_no_sparse$pve), 
+    method= rep(c("Sparse","No_sparse"),
+                times=c(length(R_snf$pve),length(R_no_sparse$pve))))
+  
+  return(list(ari=df_ari, pve=df_pve))
+}))
+```
+
+
+
+## Performance evaluation
+
+```{r, violin_plot, eval=TRUE}
+ARI_dat <-  do.call(rbind, perf[1:20])
+g <- ARI_dat %>% ggplot(aes(x=method, fill=method, y=ARI))+geom_violin()+theme_bw()+theme(legend.position = "none", axis.text.x = element_text(size=15), axis.title.y = element_text(size=15), axis.text.y = element_text(size=10))+xlab("")+geom_point(alpha=0.5)
+ARI_dat %>% group_by(method) %>% summarise(mean=mean(ARI))
+```
+
+No influence on the classification 
+
+
+## Sparsity vs no sparsity 
+
+```{r}
+c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.02, noise=0.2)
+c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary",
+                 params=list(c(p=0.3)), prop=0.1, noise=0.3)
+
+params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
+
+c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500,flavor="beta", 
+                 params=params_beta, prop=0.2, noise=0.2)
+data <- list(c_1$data, c_2$data, c_3$data)
+true.clust <- c_1$true.clusters
+data_names <- c("gaussian", "binary", "beta-like")
+names(data) <- data_names
+data_t <- data
+data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
+
+R_snf <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="snf", flavor_mod="glmnet")
+
+R_no_sparse <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="snf", flavor_mod="no_sparse")
+```
+
+
+Clearly the model with sparsity on H give similar results on classification but besides, selects  relevant variables.
+
+
+
+
+
+```{r}
+df_1 <- tibble(no_sparse_H = R_no_sparse$H[[1]] %>% as.numeric(),sparse_H = R_snf$H[[1]] %>% as.numeric() )
+g1 <- df_1 %>% ggplot(aes(y = no_sparse_H, x = sparse_H))+geom_point (alpha= 0.5)+theme_bw()+ylab("no sparse  coefficients")+xlab("sparse coefficients")
+
+df_2 <- tibble(no_sparse_H = R_no_sparse$H[[2]] %>% as.numeric(),sparse_H = R_snf$H[[2]] %>% as.numeric() )
+g2 <- df_2 %>% ggplot(aes(y = no_sparse_H, x = sparse_H))+geom_point (alpha= 0.5)+theme_bw()+ylab("no sparse  coefficients")+xlab("sparse coefficients")
+
+df_3 <- tibble(no_sparse_H = R_no_sparse$H[[3]] %>% as.numeric(),sparse_H = R_snf$H[[3]] %>% as.numeric() )
+g3 <- df_3 %>% ggplot(aes(y = no_sparse_H, x = sparse_H))+geom_point (alpha= 0.5)+theme_bw()+ylab("no sparse  coefficients")+xlab("sparse coefficients")
+
+gridExtra::grid.arrange(g1, g2, g3, ncol = 3)
+```
+
