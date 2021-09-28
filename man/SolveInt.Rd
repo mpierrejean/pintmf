@@ -9,6 +9,7 @@ SolveInt(
   p,
   max.it = 20,
   flavor_mod = "glmnet",
+  flavor_mod_W = "glmnet",
   group = NULL,
   type = rep("none", length(Y)),
   init_flavor = "snf",
@@ -24,7 +25,9 @@ SolveInt(
 \item{max.it}{by default 20. Maximum iteration of the algorithm, else until convergence
 of matrix W}
 
-\item{flavor_mod}{glmnet or (oem not implemented yet)}
+\item{flavor_mod}{This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "biglasso"or "ncvreg" or quadrupen or no_sparse}
+
+\item{flavor_mod_W}{glmnet or no_sparse}
 
 \item{group}{default is NULL (unsupervised way) otherwise the W matrix is
 fixed and algorithm is run in a supervised way.}

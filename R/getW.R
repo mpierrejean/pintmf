@@ -1,6 +1,7 @@
 #' Get.W
 #' @title get.W solve equation of W
 #' @param Zbar summary of various blocks of ceofficient  matrices
+#' @param flavor_mod This refers to the mode of resolution of matrix W. The default is "glmnet" else you can choose sparse_lsei,sparse_glmnet or cv_glmnet
 #' @param Ybar summary of various block of  observations
 #' library(Matrix)
 #' library(dplyr)
@@ -20,36 +21,59 @@
 #' @importFrom limSolve lsei
 #' @importFrom dplyr %>%
 #' @export
-get.W <- function(Zbar, Ybar) {
-  Wc <-  lapply(1:nrow(Ybar), FUN=solvew, Ybar=Ybar, Zbar=Zbar) %>% simplify2array %>% t
+get.W <- function(Zbar, Ybar, flavor_mod='glmnet') {
+  print(flavor_mod)
+  Wc <-  lapply(1:nrow(Ybar), FUN=solvew, Ybar=Ybar, Zbar=Zbar, flavor_mod= flavor_mod) %>% simplify2array %>% t
   return(Wc)
 }
 
 
-solvew <- function(ind, Ybar, Zbar){
+solvew <- function(ind, Ybar, Zbar, flavor_mod){
   ybar <- Ybar[ind,]
   p <- ncol(Zbar)
-  fit <-  try(glmnet(x=Zbar, y=ybar,
-                      alpha=0,
-                      lower.limits=0,lambda = 1,
-                      intercept=FALSE))
-  if (inherits(fit, "try-error")|sum(fit$beta)==0) {
-    message("Something wrong occurs, init W with Lsei")
-    w <- try(lsei(A=Zbar, B=ybar, E=rep(1, p), F=1))
-    if (inherits(w, "try-error")) {
-      w <- rep(1/p, p)
-    }else{
-      w <- w$X
+  if(flavor_mod=='glmnet'){
+    fit <-  try(glmnet(x=Zbar, y=ybar,
+                       alpha=0,
+                       lower.limits=0,lambda = 1,
+                       intercept=FALSE))
+    if (inherits(fit, "try-error")|sum(fit$beta)==0) {
+      message("Something wrong occurs, init W with Lsei")
+      w <- try(lsei(A=Zbar, B=ybar, E=rep(1, p), F=1))
+      if (inherits(w, "try-error")) {
+        w <- rep(1/p, p)
+      }else{
+        w <- w$X
+      }
+    } else{
+      if(is.na(sum(as.vector(fit$beta)))){
+        w <- rep(1/p, p)
+      }else{
+        w <- as.vector(fit$beta)
+        w <- w/sum(w)
+      }
+
     }
-  } else{
-     if(is.na(sum(as.vector(fit$beta)))){
-       w <- rep(1/p, p)
-     }else{
-       w <- as.vector(fit$beta)
-       #w <- w/sqrt(sum(w^2))
-       w <- w/sum(w)
-   # w <- fit
-    }
+  }
+  else if(flavor_mod=='sparse_lsei'){
+    w <- lsei(A=Zbar, B=ybar, H = rep(0, p), G = diag(1, p), type=2)$X
+    w <- w/sum(w)
+  }
+  else if(flavor_mod=='sparse_glmnet'){
+    w <- glmnet(x=Zbar, y=ybar,
+                alpha=0,
+                lower.limits=0,lambda = 0,
+                intercept=FALSE)$beta %>% as.vector()
+    w <- w/sum(w)
+  }
+  else if(flavor_mod=='cv_glmnet'){
+    cvfit <- cv.glmnet(x=Zbar, y=ybar,
+                alpha=0,
+                lower.limits=0,
+                intercept=FALSE)
+    w <- coef(cvfit)[-1,]
+    w <- w/sum(w)
+  }else{
+    stop("Please choose flavor_mod : 'glmnet' or cv_glmnet or 'sparse_lsei','sparse_glmnet' or for matrix W")
 
   }
   return(round(w, 1))

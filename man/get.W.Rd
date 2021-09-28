@@ -4,7 +4,7 @@
 \alias{get.W}
 \title{get.W solve equation of W}
 \usage{
-get.W(Zbar, Ybar)
+get.W(Zbar, Ybar, flavor_mod = "glmnet")
 }
 \arguments{
 \item{Zbar}{summary of various blocks of ceofficient  matrices}
@@ -23,6 +23,8 @@ Y3 <- as.matrix(W%*%H3 + rnorm(20, sd=1))
 Ybar <- cbind(Y1, Y2, Y3)
 Zbar <- cbind(H1, H2, H3) %>% t
 We <- get.W(Zbar, Ybar)}
+
+\item{flavor_mod}{This refers to the mode of resolution of matrix W. The default is "glmnet" else you can choose sparse_lsei,sparse_glmnet or cv_glmnet}
 }
 \description{
 Get.W
