@@ -136,7 +136,7 @@ gridExtra::grid.arrange(g1, g2, g3, ncol = 3)
 ```
 
 # W no sparse
-```{r, run_init, eval=TRUE}
+```{r, W, eval=TRUE}
 set.seed(55)
 perf <- do.call(rbind, lapply(1:20, function (ii){
   print(ii)
@@ -185,7 +185,7 @@ perf <- do.call(rbind, lapply(1:20, function (ii){
 
 ## Performance evaluation
 
-```{r, violin_plot, eval=TRUE}
+```{r, violin_plot_W, eval=TRUE}
 ARI_dat <-  do.call(rbind, perf[1:20])
 g <- ARI_dat %>% ggplot(aes(x=method, fill=method, y=ARI))+geom_violin()+theme_bw()+theme(legend.position = "none", axis.text.x = element_text(size=15), axis.title.y = element_text(size=15), axis.text.y = element_text(size=10))+xlab("")+geom_point(alpha=0.5)
 ARI_dat %>% group_by(method) %>% summarise(mean=mean(ARI))
@@ -223,7 +223,7 @@ data_t[[3]] <- log2(data[[3]]/(1-data[[3]]))
   
 col <- colorRampPalette(c("darkblue", "white", "darkorange"))(20)
 
-gplots::heatmap.2(R_glmnet$W, scale = 'none',main = 'glmnet',col = col,trace="none", cexRow = 1, cexCol = 1)
+gplots::heatmap.2(R_glmnet$W, scale = 'none',main = 'glmnet l=1',col = col,trace="none", cexRow = 1, cexCol = 1)
 gplots::heatmap.2(R_lsei$W, scale = 'none',main = 'lsei',col = col,trace="none", cexRow = 1, cexCol = 1)
 gplots::heatmap.2(R_cv_glmnet$W, scale = 'none',main = 'cv.glmnet',col = col, trace="none", cexRow = 1, cexCol = 1)
 gplots::heatmap.2(R_sparse_glmnet$W, scale = 'none',main = 'glmnet l=0', col = col,trace="none", cexRow = 1, cexCol = 1)
@@ -234,7 +234,7 @@ mat <- cbind (c(R_glmnet$H[[1]]),
               c(R_lsei$H[[1]]),
               c(R_cv_glmnet$H[[1]]),
               c(R_sparse_glmnet$H[[1]]))
-colnames(mat) <- c('glmnet', 'lsei', 'cv_glmnet', 'glmnet_l0')
+colnames(mat) <- c('glmnet_l1', 'lsei', 'cv_glmnet', 'glmnet_l0')
 M <- mat %>% cor
 col <- colorRampPalette(c("darkblue", "white", "darkorange"))(20)
 gplots::heatmap.2(x = M, col = col, symm = TRUE,trace="none", cexRow = 1, cexCol = 1)
@@ -244,7 +244,7 @@ mat <- cbind (c(R_glmnet$H[[2]]),
               c(R_lsei$H[[2]]),
               c(R_cv_glmnet$H[[2]]),
               c(R_sparse_glmnet$H[[2]]))
-colnames(mat) <- c('glmnet', 'lsei', 'cv_glmnet', 'glmnet_l0')
+colnames(mat) <- c('glmnet_l1', 'lsei', 'cv_glmnet', 'glmnet_l0')
 M <- mat %>% cor
 col <- colorRampPalette(c("darkblue", "white", "darkorange"))(20)
 gplots::heatmap.2(x = M, col = col, symm = TRUE,trace="none", cexRow = 1, cexCol = 1)
@@ -256,9 +256,156 @@ mat <- cbind (c(R_glmnet$H[[3]]),
               c(R_lsei$H[[3]]),
               c(R_cv_glmnet$H[[3]]),
               c(R_sparse_glmnet$H[[3]]))
-colnames(mat) <- c('glmnet', 'lsei', 'cv_glmnet', 'glmnet_l0')
+colnames(mat) <- c('glmnet_l1', 'lsei', 'cv_glmnet', 'glmnet_l0')
 M <- mat %>% cor
 col <- colorRampPalette(c("darkblue", "white", "darkorange"))(20)
 gplots::heatmap.2(x = M, col = col, symm = TRUE,trace="none", cexRow = 1, cexCol = 1)
 
 ```
+
+## Less sparsity on H and W
+
+```{r}
+R_no_sparse_WH <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="snf", flavor_mod_W="cv_glmnet",flavor_mod= 'no_sparse')
+R_sparse_WH <- SolveInt(Y=data_t, p=4, max.it=5, verbose=FALSE, init_flavor="snf", flavor_mod_W="glmnet",flavor_mod= 'glmnet')
+
+```
+
+```{r correlations}
+
+mat <- cbind (c(R_no_sparse_WH$W),
+              c(R_sparse_WH$W))
+cor(mat)
+
+mat <- cbind (c(R_no_sparse_WH$H[[1]]),
+              c(R_sparse_WH$H[[1]]))
+
+cor(mat)
+mat <- cbind (c(R_no_sparse_WH$H[[2]]),
+              c(R_sparse_WH$H[[2]]))
+cor(mat)
+
+mat <- cbind (c(R_no_sparse_WH$H[[3]]),
+              c(R_sparse_WH$H[[3]]))
+cor(mat)
+
+
+```
+
+## Compute TPR and FPR as well as F1-score
+
+
+```{r}
+TPR_compute <- function(truth, selected_var,nvar=NULL){
+  denom_tp <-truth %>%  length
+  tpr <- (selected_var%>% intersect(truth) %>% length)/denom_tp
+
+  return(tpr)
+}
+
+FPR_compute <- function(truth, selected_var, J,nvar=NULL){
+ denom_tp <-truth %>%  length
+ fpr <- (selected_var%>% setdiff(truth) %>% length)/(J-denom_tp)
+
+  return(fpr)
+}
+```
+
+
+
+```{r}
+truth_1= c_1$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[1]] ))!=0) %>% names
+TPR_compute(selected_var_1, truth = truth_1)
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[1]] ))!=0) %>% names
+FPR_compute(selected_var_1, truth = truth_1, J = 1000)
+
+
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[1]] ))!=0) %>% names
+TPR_compute(selected_var_1, truth = truth_1)
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[1]] ))!=0) %>% names
+FPR_compute(selected_var_1, truth = truth_1,J =1000)
+```
+
+```{r}
+truth_1= c_2$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[2]] ))!=0) %>% names
+TPR_compute(selected_var_1, truth = truth_1)
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[2]] ))!=0) %>% names
+TPR_compute(selected_var_1, truth = truth_1)
+
+truth_1= c_2$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[2]] ))!=0) %>% names
+FPR_compute(selected_var_1, truth = truth_1, J = 500)
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[2]] ))!=0) %>% names
+FPR_compute(selected_var_1, truth = truth_1,J =500)
+```
+
+```{r}
+truth_1= c_3$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[3]] ))!=0) %>% names
+TPR_compute(selected_var_1, truth = truth_1)
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[3]] ))!=0) %>% names
+TPR_compute(selected_var_1, truth = truth_1)
+
+truth_1= c_3$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[3]] ))!=0) %>% names
+FPR_compute(selected_var_1, truth = truth_1, J = 5000)
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[3]] ))!=0) %>% names
+FPR_compute(selected_var_1, truth = truth_1,J =5000)
+```
+```{r}
+F1_score <- function(truth, selected_var, all_vars){
+  negative_truth <- setdiff(all_vars, truth) 
+  TP <- (selected_var%>% intersect(truth) %>% length)
+  FP <-  (selected_var%>% setdiff(truth) %>% length)
+  negative <-  setdiff(all_vars, selected_var) 
+  FN <-  intersect(negative, truth) %>% length()
+  TN <-    intersect(negative, negative_truth) %>% length()
+  F1 <- 2*((TP/(TP+FP))*(TP/(TP+FN)))/((TP/(TP+FP))+TP/(TP+FN))
+  
+  return(F1)
+}
+```
+ 
+```{r f1_score}
+
+truth_1= c_3$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[3]] ))!=0) %>% names
+f_1_3_no_sparse <- F1_score(truth = truth_1, selected_var_1, all_vars= colnames(R_no_sparse$H[[3]]))
+
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[3]] ))!=0) %>% names
+f_1_3_sparse <- F1_score(truth = truth_1, selected_var_1, all_vars= colnames(R_no_sparse$H[[3]]))
+
+truth_1= c_1$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[1]] ))!=0) %>% names
+f_1_1_no_sparse <- F1_score(truth = truth_1, selected_var_1, all_vars= colnames(R_no_sparse$H[[1]]))
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[1]] ))!=0) %>% names
+f_1_1_sparse <- F1_score(truth = truth_1, selected_var_1, all_vars= colnames(R_no_sparse$H[[1]]))
+
+truth_1= c_2$positive %>% unlist() %>% unique()
+selected_var_1 <-  which(colSums(abs(R_no_sparse$H[[2]] ))!=0) %>% names
+f_1_2_no_sparse <- F1_score(truth = truth_1, selected_var_1, all_vars= colnames(R_no_sparse$H[[2]]))
+selected_var_1 <-  which(colSums(abs(R_sparse_WH$H[[2]] ))!=0) %>% names
+f_1_2_sparse <- F1_score(truth = truth_1, selected_var_1, all_vars= colnames(R_no_sparse$H[[2]]))
+
+
+pander::pandoc.table(tibble(data=data_t %>% names,  no_sparse= c(f_1_1_no_sparse, f_1_2_no_sparse, f_1_3_no_sparse), sparse= c(f_1_1_sparse, f_1_2_sparse, f_1_3_sparse)))
+
+```
+
+We conclude that sparsity improved results in terms of variables selection. The sparse algorithm performs as well as or better than non-sparse algorithm.
+
+
+
+
+```{r}
+gplots::heatmap.2(R_no_sparse_WH$W, scale = 'none',main = 'glmnet',col = col,trace="none", cexRow = 1, cexCol = 1)
+gplots::heatmap.2(R_no_sparse_WH$H[[1]], scale = 'none',main = 'glmnet',col = col,trace="none", cexRow = 1, cexCol = 1)
+gplots::heatmap.2(R_no_sparse_WH$H[[2]], scale = 'none',main = 'glmnet',col = col,trace="none", cexRow = 1, cexCol = 1)
+gplots::heatmap.2(R_no_sparse_WH$H[[3]], scale = 'none',main = 'glmnet',col = col,trace="none", cexRow = 1, cexCol = 1)
+
+
+```
+
+

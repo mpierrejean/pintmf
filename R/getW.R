@@ -22,7 +22,6 @@
 #' @importFrom dplyr %>%
 #' @export
 get.W <- function(Zbar, Ybar, flavor_mod='glmnet') {
-  print(flavor_mod)
   Wc <-  lapply(1:nrow(Ybar), FUN=solvew, Ybar=Ybar, Zbar=Zbar, flavor_mod= flavor_mod) %>% simplify2array %>% t
   return(Wc)
 }
@@ -38,15 +37,17 @@ solvew <- function(ind, Ybar, Zbar, flavor_mod){
                        intercept=FALSE))
     if (inherits(fit, "try-error")|sum(fit$beta)==0) {
       message("Something wrong occurs, init W with Lsei")
-      w <- try(lsei(A=Zbar, B=ybar, E=rep(1, p), F=1))
-      if (inherits(w, "try-error")) {
-        w <- rep(1/p, p)
-      }else{
-        w <- w$X
-      }
+      w <- lsei(A=Zbar, B=ybar, H = rep(0, p), G = diag(1, p), type=2)$X
+      w <- w/sum(w)
+
     } else{
       if(is.na(sum(as.vector(fit$beta)))){
-        w <- rep(1/p, p)
+        cvfit <- cv.glmnet(x=Zbar, y=ybar,
+                           alpha=0,
+                           lower.limits=0,
+                           intercept=FALSE)
+        w <- coef(cvfit)[-1,]
+        w <- w/sum(w)
       }else{
         w <- as.vector(fit$beta)
         w <- w/sum(w)
@@ -67,9 +68,9 @@ solvew <- function(ind, Ybar, Zbar, flavor_mod){
   }
   else if(flavor_mod=='cv_glmnet'){
     cvfit <- cv.glmnet(x=Zbar, y=ybar,
-                alpha=0,
-                lower.limits=0,
-                intercept=FALSE)
+                       alpha=0,
+                       lower.limits=0,
+                       intercept=FALSE)
     w <- coef(cvfit)[-1,]
     w <- w/sum(w)
   }else{
