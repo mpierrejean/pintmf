@@ -9,6 +9,6 @@ devtools::install_github(mpierrejean/pintmf)
 ```
 
 Morgane Pierre-Jean, Florence Mauger, Jean-François Deleuze, Edith Le Floch.
-**PINTMF: PENALIZED INTEGRATIVE MATRIX FACTORIZATION METHOD FOR MULTI-OMICS DATA.** 2021. ⟨hal-03154671⟩
+**PINTMF: PENALIZED INTEGRATIVE MATRIX FACTORIZATION METHOD FOR MULTI-OMICS DATA.** 2021. Bioinformatics
 
-The manuscript is available [here](https://arxiv.org/abs/2103.03184)
+The manuscript is available [here](https://academic.oup.com/bioinformatics/article/38/4/900/6443074)
