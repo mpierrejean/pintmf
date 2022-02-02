@@ -1,7 +1,3 @@
-### TEst 20/11
-## Remplacement du colSUms par le colSds
-
-
 
 ComputepAUC <- function(roc) {
   TPR <- roc$TPR

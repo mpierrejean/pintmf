@@ -38,14 +38,14 @@ nByclust= c(5, 10, 25, 10)
 
 ```{r bootstrap, message=FALSE, eval=FALSE}
 set.seed(55)
-c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=100, prop=0.05, noise=0.2)
-c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=50, flavor="binary",
-                 params=list(c(p=0.6)), prop=0.1, noise=0.3)
+c_1 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=1000, prop=0.05, noise=0.2)
+c_2 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500, flavor="binary",
+                 params=list(c(p=0.6)), prop=0.01, noise=0.1)
 
 params_beta <- list(c(mean1=-1, mean2=1, sd1=0.5, sd2=0.5))
 
-c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=500,flavor="beta", 
-                 params=params_beta, prop=0.2, noise=0.2)
+c_3 <- simulateY(nclust = nclust,  n_byClust = nByclust, J=5000,flavor="beta", 
+                 params=params_beta, prop=0.02, noise=0.1)
 data <- list(c_1$data, c_2$data, c_3$data)
 
 bootstrap <- lapply(1:sum(nByclust), function (ii){
@@ -64,6 +64,7 @@ count_1 <- lapply(bootstrap, function (bb)  which(colSums(abs(bb$H[[1]]))!=0) %>
 count_2 <- lapply(bootstrap, function (bb)  which(colSums(abs(bb$H[[2]]))!=0) %>% names)
 count_3 <- lapply(bootstrap, function (bb)  which(colSums(abs(bb$H[[3]]))!=0) %>% names)
 ```
+
 ```{r, eval=FALSE}
 d1 <- data.frame(count_1 %>% unlist %>% t %>% table, dat="gaussian")
 d2 <- data.frame(count_2 %>% unlist %>% t %>% table, dat="binary")
@@ -75,8 +76,8 @@ g <- d%>% ggplot(aes(y=Freq, x=dat))+geom_violin( fill="#999999")+theme_bw()+xla
 g <- g+theme(axis.text = element_text(size=15), axis.title.y = element_text(size=15))
 g
 ```
-```{r}
-#g %>% ggsave(filename="../../Figs/bootstrap_simulation.pdf", width=6, height=4)
+```{r, eval=FALSE}
+g %>% ggsave(filename="~/Figs_pintMF/bootstrap_simulation.eps", width=6, height=4)
 ```
 
 ```{r, eval=FALSE}

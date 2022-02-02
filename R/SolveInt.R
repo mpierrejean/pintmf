@@ -14,7 +14,8 @@
 #'   methylation data takes values between 0 and 1.
 #' @param verbose A logical value indicating whether to print extra information.
 #'   Defaults to FALSE
-#' @param flavor_mod glmnet or (oem not implemented yet)
+#' @param flavor_mod This refers to the mode of resolution of matrix H. The default is "glmnet", user can chose "biglasso"or "ncvreg" or quadrupen or no_sparse
+#' @param flavor_mod_W glmnet or no_sparse
 #' @param init_flavor flavor to initialize W matrix (hclust, SNF, random or svd)
 #' @param ... other arguments
 #'
@@ -30,7 +31,7 @@
 #' @importFrom future plan
 #' @importFrom nnet class.ind
 #' @import stats
-SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep("none", length(Y)), init_flavor="snf", verbose=FALSE,...
+SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet",flavor_mod_W="glmnet", group=NULL, type=rep("none", length(Y)), init_flavor="snf", verbose=FALSE,...
 ) {
   if (!is.list(Y)) {
     stop("Y is not a list")
@@ -123,8 +124,9 @@ SolveInt <- function(Y, p, max.it=20, flavor_mod="glmnet", group=NULL, type=rep(
         Hc_norm <- lapply(Hc, function(hh) hh/sqrt(ncol(hh)))
         Zbar <- t(bind_cols(lapply(Hc_norm, data.frame))) %>% as.matrix()
         Ybar <- bind_cols(lapply(Yt, data.frame)) %>% as.matrix
+        print(flavor_mod_W)
         Wc <- get.W(Zbar=Zbar,
-                    Ybar=Ybar)
+                    Ybar=Ybar, flavor_mod=flavor_mod_W)
         if(it==1){
           W.old <- Wc
         }
