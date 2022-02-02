@@ -1,7 +1,7 @@
 Package: PintMF
 Type: Package
 Title: Penalized Integrative Matrix Factorization for Multiomics Data
-Version: 0.1.8-9000
+Version: 0.1.9-9000
 Date: 2021-08-12
 Authors@R: person("Morgane", "Pierre-Jean", email = "mpierrejean.pro@gmail.com",
                   role = c("aut", "cre"))
@@ -10,7 +10,7 @@ Depends: R (>= 3.5.0)
 License: GPL
 LazyData: TRUE
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports:
     Matrix,
     glmnet,
@@ -22,8 +22,6 @@ Imports:
     limSolve,
     stats,
     ncvreg,
-    biglasso,
-    bigmemory,
     methods
 Suggests:
     cluster,
@@ -38,9 +36,11 @@ Suggests:
     gridExtra,
     tidyr,
     circlize,
+    biglasso,
     ComplexHeatmap,
     iCluster,
     survminer,
+    bigmemory,
     CIMLR,
     ConsensusClusterPlus,
     org.Hs.eg.db,
@@ -57,5 +57,3 @@ Suggests:
     GenomicRanges,
     enrichplot,
     rmarkdown
-
-

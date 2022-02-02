@@ -1,5 +1,7 @@
 Package: PintMF
 ==============
+Version: 0.1.9-9000 [2022-02-02]
+  o Remove biglasso and bigmemory dependencies issue github
 Version: 0.1.8-9000 [2021-08-12]
   o Revised version
   o Added vignettes to compare without sparsity
