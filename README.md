@@ -5,7 +5,7 @@ Penalized integrative matrix factorrization method to analyze multi-omic data.
 Install package
 
 ```r
-devtools::install_github(mpierrejean/pintmf)
+devtools::install_github("mpierrejean/pintmf")
 ```
 This work has been published in *Bioinformatics*
 
