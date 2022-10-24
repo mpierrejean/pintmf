@@ -58,7 +58,7 @@ get.H <- function(W, y, flavor_mod="glmnet", verbose) {
     Z <-  coef(cvfit)[-1]%>% matrix(nrow = p, ncol = J, byrow = FALSE)
     Z <- round(Z,2)
   }
-  if(flavor_mod=="biglasso" & nzchar(system.file(package = 'biglasso') & nzchar(system.file(package = 'bigmemory')))){
+  if(flavor_mod=="biglasso" & nzchar(system.file(package = 'biglasso')) & nzchar(system.file(package = 'bigmemory'))){
     ## Lasso regression with biglasso
     W.tilde <- Matrix(kronecker(Diagonal(J), W), sparse = FALSE) %>% as.matrix%>% as.big.matrix()
     y.tilde <- (as.numeric(y))
